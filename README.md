@@ -4,7 +4,4 @@
 * Variable and type have to name with your nickname. 
 * All as in example.
 
-You can build your .so file with command\
-`go build -buildmode=plugin -o {OUT_FILE} {GO_FILE}` \
-But your version of go must be 1.13.1\
-You can use docker for it
+You can upload your .go file on http://213.231.4.254:81
