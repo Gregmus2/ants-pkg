@@ -2,13 +2,14 @@ package pkg
 
 type FieldType uint8
 
-const EmptyField FieldType = 0
-const FoodField FieldType = 1
-const AllyField FieldType = 2
-const EnemyField FieldType = 3
-const WallField FieldType = 4
-const AntField FieldType = 5
-const AnthillField FieldType = 6
+const NoField FieldType = 0
+const EmptyField FieldType = 1
+const FoodField FieldType = 2
+const AllyField FieldType = 3
+const EnemyField FieldType = 4
+const WallField FieldType = 5
+const AntField FieldType = 6
+const AnthillField FieldType = 7
 
 type Action uint8
 
