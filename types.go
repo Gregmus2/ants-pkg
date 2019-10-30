@@ -7,13 +7,13 @@ type Algorithm interface {
 	Do(fields [5][5]FieldType, round int) (target Pos, action Action)
 }
 
-type Pos [2]uint
+type Pos [2]int
 
-func (p *Pos) X() uint {
+func (p *Pos) X() int {
 	return p[0]
 }
 
-func (p *Pos) Y() uint {
+func (p *Pos) Y() int {
 	return p[1]
 }
 
@@ -25,7 +25,7 @@ to input position
 */
 func (p Pos) RelativePosition(field uint8) Pos {
 	return Pos{
-		p.X() + uint(math.Mod(float64(field+3), 3)-1),
-		p.Y() + uint(math.Floor(float64(field/3))-1), //nolint
+		p.X() + int(math.Mod(float64(field+3), 3)-1),
+		p.Y() + int(math.Floor(float64(field/3))-1), //nolint
 	}
 }
