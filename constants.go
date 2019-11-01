@@ -10,6 +10,8 @@ const EnemyField FieldType = 4
 const WallField FieldType = 5
 const AntField FieldType = 6
 const AnthillField FieldType = 7
+const AllyAnthillField FieldType = 8
+const EnemyAnthillField FieldType = 9
 
 type Action uint8
 
