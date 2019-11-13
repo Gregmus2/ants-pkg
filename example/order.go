@@ -1,32 +1,30 @@
 package example
 
-import pkg "github.com/gregmus2/ants-pkg"
+import (
+	pkg "github.com/gregmus2/ants-pkg"
+	"math"
+)
 
 type order struct {
-	ant       *ant
-	hasOrder  bool
-	pos       *pkg.Pos
-	action    pkg.Action
-	blackZone *pkg.Pos
+	ant      *ant
+	hasOrder bool
+	pos      *pkg.Pos
+	action   pkg.Action
 }
 
-func giveOrder(ant *ant) *order {
-	o := &order{ant: ant}
-	if o.urgent() {
-		return o
+func giveOrder(ant *ant) (*pkg.Pos, pkg.Action) {
+	if ant.Order == nil {
+		ant.Order = &order{ant: ant}
 	}
 
-	o.calcBlackArea()
-	o.goal()
+	if pos, action, ok := ant.Order.urgent(); ok {
+		return pos, action
+	}
 
-	return o
+	return ant.Order.follow()
 }
 
-func (o *order) get() (*pkg.Pos, pkg.Action) {
-	return o.pos, o.action
-}
-
-func (o *order) urgent() bool {
+func (o *order) urgent() (*pkg.Pos, pkg.Action, bool) {
 	var foodPos *pkg.Pos
 	var enemyPos *pkg.Pos
 	for x := o.ant.Pos.X - 1; x <= o.ant.Pos.X+1; x++ {
@@ -35,9 +33,7 @@ func (o *order) urgent() bool {
 			// primary goal it's enemy anthill
 			// todo add Enemy|Ally AnthillField logic to main app
 			case pkg.EnemyAnthillField:
-				o.pos = o.ant.RelativePos(x, y)
-				o.action = pkg.AttackAction
-				return true
+				return o.ant.RelativePos(x, y), pkg.AttackAction, true
 			case pkg.EnemyField:
 				enemyPos = o.ant.RelativePos(x, y)
 			case pkg.FoodField:
@@ -47,33 +43,31 @@ func (o *order) urgent() bool {
 	}
 
 	if enemyPos != nil {
-		o.pos = enemyPos
-		o.action = pkg.AttackAction
-		return true
+		return enemyPos, pkg.AttackAction, true
 	}
 
 	if foodPos != nil {
 		// todo add birth handler (you should know about new ant)
-		o.pos = foodPos
-		o.action = pkg.EatAction
-		return true
+		return foodPos, pkg.EatAction, true
 	}
 
-	return false
-}
-
-// calculate the black area, your ant should avoid
-func (o *order) calcBlackArea() {
-	y := o.ant.Pos.Y - 3
-	for x := o.ant.Pos.X - 3; x <= o.ant.Pos.X+3; x++ {
-		// todo handle possibility of two enemies
-		if area[x][y] == pkg.EnemyField {
-			o.blackZone = &pkg.Pos{X: x, Y: y}
-		}
-	}
+	return &pkg.Pos{}, 0, false
 }
 
 // it's about long-term goal based on role. Like explore or go to capture enemy anthill
+func (o *order) follow() (*pkg.Pos, pkg.Action) {
+	if o.pos == nil || o.pos == o.ant.Pos {
+		o.goal()
+	}
+
+	diffX := o.pos.X - o.ant.Pos.X
+	deltaX := diffX / int(math.Abs(float64(diffX)))
+	diffY := o.pos.Y - o.ant.Pos.Y
+	deltaY := diffY / int(math.Abs(float64(diffY)))
+
+	return &pkg.Pos{X: deltaX, Y: deltaY}, pkg.MoveAction
+}
+
 func (o *order) goal() {
 
 }

@@ -11,8 +11,9 @@ type field struct {
 }
 
 type ant struct {
-	Pos  *pkg.Pos
-	Role role
+	Pos   *pkg.Pos
+	Role  role
+	Order *order
 }
 
 func (a *ant) RelativePos(x int, y int) *pkg.Pos {
@@ -71,7 +72,7 @@ func init() {
 	area[birthPoint][birthPoint] = pkg.AllyField
 }
 
-func (g greg) Do(fields [5][5]pkg.FieldType, round int) (target *pkg.Pos, action pkg.Action) {
+func (g greg) Do(fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
 	// if it is, new part become and my first ant going again
 	if round != roundCounter {
 		roundCounter = round
@@ -85,11 +86,12 @@ func (g greg) Do(fields [5][5]pkg.FieldType, round int) (target *pkg.Pos, action
 
 	currentAnt := ants[antOrder]
 	antOrder++
+	currentAnt.Pos.Add(posDiff)
 	updateArea(fields, currentAnt)
 
 	// todo catch first anthill, birth point
 
-	return giveOrder(currentAnt).get()
+	return giveOrder(currentAnt)
 }
 
 // update information about real area on my prospective area
