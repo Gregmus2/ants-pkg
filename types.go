@@ -2,7 +2,7 @@ package pkg
 
 type Algorithm interface {
 	Start(anthill Pos, birth Pos)
-	Do(fields [5][5]FieldType, round int) (target Pos, action Action)
+	Do(fields [5][5]FieldType, round int) (target *Pos, action Action)
 }
 
 type Pos struct{ X, Y int }
