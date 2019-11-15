@@ -7,12 +7,12 @@ type Algorithm interface {
 
 type Pos struct{ X, Y int }
 
-func (p Pos) Add(pos *Pos) {
+func (p *Pos) Add(pos *Pos) {
 	p.X += pos.X
 	p.Y += pos.Y
 }
 
-func (p Pos) Set(x, y int) {
+func (p *Pos) Set(x, y int) {
 	p.X = x
 	p.Y = y
 }
