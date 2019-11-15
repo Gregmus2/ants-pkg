@@ -5,17 +5,14 @@ type Algorithm interface {
 	Do(fields [5][5]FieldType, round int) (target Pos, action Action)
 }
 
-type Pos [2]int
+type Pos struct{ X, Y int }
 
-func (p *Pos) X() int {
-	return p[0]
+func (p Pos) Add(pos *Pos) {
+	p.X += pos.X
+	p.Y += pos.Y
 }
 
-func (p *Pos) Y() int {
-	return p[1]
-}
-
-func (p Pos) Add(pos Pos) {
-	p[0] += pos.X()
-	p[1] += pos.Y()
+func (p Pos) Set(x, y int) {
+	p.X = x
+	p.Y = y
 }
