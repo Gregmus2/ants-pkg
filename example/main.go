@@ -4,7 +4,8 @@ import (
 	"github.com/gregmus2/ants-pkg"
 )
 
-type greg string
+type greg struct {
+}
 
 type field struct {
 	Type pkg.FieldType
@@ -31,13 +32,8 @@ const attack role = 2
 
 // prospective area
 var area [][]pkg.FieldType
-var ants []*ant
+var ants map[int]*ant
 var anthills []*pkg.Pos
-
-var roundCounter = 0
-
-// which of ants going now
-var antOrder uint
 
 // prospective size of area
 var mapSize = defaultSize
@@ -52,7 +48,7 @@ func main() {
 
 }
 
-func init() {
+func (g greg) Start(antID int) {
 	area = make([][]pkg.FieldType, defaultSize)
 	for x := range area {
 		area[x] = make([]pkg.FieldType, defaultSize)
@@ -61,35 +57,26 @@ func init() {
 		}
 	}
 
-	ants = make([]*ant, 1, 10)
+	ants = make(map[int]*ant)
 	// for the beginning I guess that my birth point in the center of prospective area
 	birthPoint := defaultSize / 2
 	// first ant exactly will birth in my birth point
-	ants[0] = &ant{
+	ants[antID] = &ant{
 		Pos:  &pkg.Pos{X: birthPoint, Y: birthPoint},
 		Role: explore,
 	}
 	area[birthPoint][birthPoint] = pkg.AllyField
 }
 
-func (g greg) Do(fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
-	// if it is, new part become and my first ant going again
-	if round != roundCounter {
-		roundCounter = round
-		antOrder = 0
-	}
-
+func (g greg) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
 	// todo handle wrong eating, when two ants eat one food. If you send order about eating it's no mean that you
 	// 	get new ant. But how I can catch when new ant birth?
 
 	// todo handle dead ants. Maybe I need one more func in Algorithm
 
-	currentAnt := ants[antOrder]
-	antOrder++
+	currentAnt := ants[antID]
 	currentAnt.Pos.Add(posDiff)
 	updateArea(fields, currentAnt)
-
-	// todo catch first anthill, birth point
 
 	return giveOrder(currentAnt)
 }
