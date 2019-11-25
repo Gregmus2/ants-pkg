@@ -2,44 +2,16 @@ package example
 
 import (
 	"github.com/gregmus2/ants-pkg"
+	"math"
 )
 
 type greg struct {
+	area         [][]pkg.FieldType // prospective area
+	ants         map[int]*ant
+	anthills     []*pkg.Pos
+	mapSize      int // prospective size of area
+	exploredPart float32
 }
-
-type field struct {
-	Type pkg.FieldType
-}
-
-type ant struct {
-	Pos   *pkg.Pos
-	Role  role
-	Order *order
-}
-
-func (a *ant) RelativePos(x int, y int) *pkg.Pos {
-	return &pkg.Pos{
-		X: x - a.Pos.X + 3,
-		Y: y - a.Pos.Y + 3,
-	}
-}
-
-type role uint8
-
-const explore role = 0
-const defend role = 1
-const attack role = 2
-
-// prospective area
-var area [][]pkg.FieldType
-var ants map[int]*ant
-var anthills []*pkg.Pos
-
-// prospective size of area
-var mapSize = defaultSize
-
-// exploredPart identify that we know edges and can calculate the explored part
-var exploredPart float32
 
 const unknownField pkg.FieldType = 255
 const defaultSize int = 100
@@ -48,41 +20,43 @@ func main() {
 
 }
 
-func (g greg) Start(antID int) {
-	area = make([][]pkg.FieldType, defaultSize)
-	for x := range area {
-		area[x] = make([]pkg.FieldType, defaultSize)
-		for y := range area[x] {
-			area[x][y] = unknownField
+func (g *greg) Start(antID int) {
+	g.mapSize = defaultSize
+
+	g.area = make([][]pkg.FieldType, defaultSize)
+	for x := range g.area {
+		g.area[x] = make([]pkg.FieldType, defaultSize)
+		for y := range g.area[x] {
+			g.area[x][y] = unknownField
 		}
 	}
 
-	ants = make(map[int]*ant)
+	g.ants = make(map[int]*ant)
 	// for the beginning I guess that my birth point in the center of prospective area
 	birthPoint := defaultSize / 2
 	// first ant exactly will birth in my birth point
-	ants[antID] = &ant{
+	g.ants[antID] = &ant{
 		Pos:  &pkg.Pos{X: birthPoint, Y: birthPoint},
-		Role: explore,
+		Role: explorer,
 	}
-	area[birthPoint][birthPoint] = pkg.AllyField
+	g.area[birthPoint][birthPoint] = pkg.AllyField
 }
 
-func (g greg) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
-	// todo handle wrong eating, when two ants eat one food. If you send order about eating it's no mean that you
+func (g *greg) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
+	// todo handle wrong eating, when two ants eat one food. If you send baseOrder about eating it's no mean that you
 	// 	get new ant. But how I can catch when new ant birth?
 
 	// todo handle dead ants. Maybe I need one more func in Algorithm
 
-	currentAnt := ants[antID]
+	currentAnt := g.ants[antID]
 	currentAnt.Pos.Add(posDiff)
-	updateArea(fields, currentAnt)
+	g.updateArea(fields, currentAnt)
 
-	return giveOrder(currentAnt)
+	return giveOrder(currentAnt, g)
 }
 
 // update information about real area on my prospective area
-func updateArea(fields [5][5]pkg.FieldType, current *ant) {
+func (g *greg) updateArea(fields [5][5]pkg.FieldType, current *ant) {
 	for dx := range fields {
 		for dy, t := range fields[dx] {
 			x := current.Pos.X + dx - 3
@@ -92,12 +66,12 @@ func updateArea(fields [5][5]pkg.FieldType, current *ant) {
 				y = current.Pos.Y + dy - 3
 			}
 
-			area[x][y] = t
+			g.area[x][y] = t
 		}
 	}
 }
 
-// todo if ant go to explore (no enemies or food near here) and somewhere we found food, ant have to go there
+// todo if ant go to explorer (no enemies or food near here) and somewhere we found food, ant have to go there
 
 // when we go beyond the intended map or get wall as a edge, we need to update our idea of map size
 func rewriteMap(x int, y int, t pkg.FieldType) bool {
@@ -106,22 +80,46 @@ func rewriteMap(x int, y int, t pkg.FieldType) bool {
 
 // todo if ant birth, they need to get role
 // todo when we explored half part of map, we need to reorder all ants
-func giveRole(unit *ant) {
-	antCount := len(ants)
+func (g *greg) giveRole(unit *ant) {
+	antCount := len(g.ants)
 
-	primaryRole := explore
-	if exploredPart > 50 {
-		primaryRole = attack
+	primaryRole := explorer
+	if g.exploredPart > 50 {
+		primaryRole = attacker
 	}
 
 	switch {
 	case antCount < 6:
 		unit.Role = primaryRole
 	case antCount >= 6 && antCount < 10:
-		unit.Role = defend
+		unit.Role = defender
 	default:
-		unit.Role = attack
+		unit.Role = attacker
 	}
+}
+
+func calcDist(a *pkg.Pos, b *pkg.Pos) int {
+	dist := math.Abs(float64(a.X - b.X))
+	// because we can move by diagonal and move by x and y in one round
+	if yDist := math.Abs(float64(a.Y - b.Y)); yDist > dist {
+		dist = yDist
+	}
+
+	return int(dist)
+}
+
+func calcNearest(pos *pkg.Pos, targets []*pkg.Pos) *pkg.Pos {
+	minDist := calcDist(targets[0], pos)
+	minPos := targets[0]
+	for i := 1; i < len(targets); i++ {
+		dist := calcDist(targets[i], pos)
+		if dist < minDist {
+			minDist = dist
+			minPos = targets[i]
+		}
+	}
+
+	return minPos
 }
 
 var Greg greg
