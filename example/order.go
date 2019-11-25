@@ -142,19 +142,46 @@ func (o *defend) goal() {
 func (o *explore) goal() {
 	var matrix [20][20]bool
 	matrix[8][9] = true
-	fromFrame := 1
-	toFrame := 5
+
 	centerX := 6
 	centerY := 6
 
+	limit := map[bool]map[int]int{
+		true:  {1: 19 - centerX, -1: centerX},
+		false: {1: 19 - centerY, -1: centerY},
+	}
+
+	fromFrame := 1
+	var toFrame int
+	if limit[true][1] > limit[false][1] {
+		toFrame = limit[true][1]
+	} else {
+		toFrame = limit[false][1]
+	}
 	isChangeX := true
+	lastPolarity := -1
 	for frame := fromFrame; frame <= toFrame; frame++ {
 		from := -(frame - 1)
 		X := from + centerX
 		Y := -frame + centerY
 		for polarity := 1; polarity >= -1; polarity -= 2 {
 			for axis := 0; axis <= 1; axis++ {
-				for j := from; j <= frame; j++ {
+				if frame > limit[!isChangeX][lastPolarity] {
+					continue
+				}
+
+				var to int
+				if limit[isChangeX][polarity] > frame {
+					to = frame
+				} else {
+					to = limit[isChangeX][polarity]
+				}
+
+				if limit[isChangeX][polarity*-1] > from {
+					from = limit[isChangeX][polarity*-1]
+				}
+
+				for j := from; j <= to; j++ {
 					if isChangeX {
 						X = j*polarity + centerX
 					} else {
@@ -166,6 +193,7 @@ func (o *explore) goal() {
 					}
 				}
 				isChangeX = !isChangeX
+				lastPolarity = polarity
 			}
 		}
 	}
