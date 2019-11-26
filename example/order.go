@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-type order interface {
+type Order interface {
 	urgent() (*pkg.Pos, pkg.Action, bool)
 	follow() (*pkg.Pos, pkg.Action)
 	goal()
@@ -17,32 +17,32 @@ type baseOrder struct {
 	hasOrder bool
 	pos      *pkg.Pos
 	action   pkg.Action
-	greg     *greg
+	ai       *AI
 }
 
-type explore struct {
+type Explore struct {
 	baseOrder
 }
 
-type attack struct {
+type Attack struct {
 	baseOrder
 }
 
-type defend struct {
+type Defend struct {
 	baseOrder
 	target *pkg.Pos
 }
 
-func giveOrder(ant *ant, greg *greg) (*pkg.Pos, pkg.Action) {
+func giveOrder(ant *ant, greg *AI) (*pkg.Pos, pkg.Action) {
 	if ant.Order == nil {
-		base := baseOrder{ant: ant, greg: greg}
+		base := baseOrder{ant: ant, ai: greg}
 		switch ant.Role {
 		case explorer:
-			ant.Order = &explore{baseOrder: base}
+			ant.Order = &Explore{baseOrder: base}
 		case defender:
-			ant.Order = &defend{baseOrder: base}
+			ant.Order = &Defend{baseOrder: base}
 		case attacker:
-			ant.Order = &attack{baseOrder: base}
+			ant.Order = &Attack{baseOrder: base}
 		}
 	}
 
@@ -62,7 +62,7 @@ func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	var enemyPos *pkg.Pos
 	for x := o.ant.Pos.X - 1; x <= o.ant.Pos.X+1; x++ {
 		for y := o.ant.Pos.Y - 1; y <= o.ant.Pos.Y+1; y++ {
-			switch o.greg.area[x][y] {
+			switch o.ai.area[x][y] {
 			// primary goal it's enemy anthill
 			// todo add Enemy|Ally AnthillField logic to main app
 			case pkg.EnemyAnthillField:
@@ -87,7 +87,7 @@ func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	return &pkg.Pos{}, 0, false
 }
 
-// it's about long-term goal based on role. Like explorer or go to capture enemy anthill
+// it's about long-term goal based on Role. Like explorer or go to capture enemy anthill
 func (o *baseOrder) follow() (*pkg.Pos, pkg.Action) {
 	// todo check for obstacles
 	diffX := o.pos.X - o.ant.Pos.X
@@ -102,9 +102,9 @@ func (o *baseOrder) hasGoal() bool {
 	return o.pos != nil && o.pos != o.ant.Pos
 }
 
-func (o *defend) goal() {
+func (o *Defend) goal() {
 	if o.target == nil {
-		o.target = calcNearest(o.ant.Pos, o.greg.anthills)
+		o.target = o.ant.Pos.CalcNearest(o.ai.anthills)
 		/*
 			Calc nearest guard position of target anthill
 			p - guard position; t - target anthill
@@ -113,7 +113,7 @@ func (o *defend) goal() {
 			--t--
 			p---p
 		*/
-		o.pos = calcNearest(o.ant.Pos, []*pkg.Pos{
+		o.pos = o.ant.Pos.CalcNearest([]*pkg.Pos{
 			{X: o.target.X - 2, Y: o.target.Y - 2},
 			{X: o.target.X + 2, Y: o.target.Y - 2},
 			{X: o.target.X + 2, Y: o.target.Y + 2},
@@ -139,66 +139,10 @@ func (o *defend) goal() {
 	}
 }
 
-func (o *explore) goal() {
-	var matrix [20][20]bool
-	matrix[8][9] = true
-
-	centerX := 6
-	centerY := 6
-
-	limit := map[bool]map[int]int{
-		true:  {1: 19 - centerX, -1: centerX},
-		false: {1: 19 - centerY, -1: centerY},
-	}
-
-	fromFrame := 1
-	var toFrame int
-	if limit[true][1] > limit[false][1] {
-		toFrame = limit[true][1]
-	} else {
-		toFrame = limit[false][1]
-	}
-	isChangeX := true
-	lastPolarity := -1
-	for frame := fromFrame; frame <= toFrame; frame++ {
-		from := -(frame - 1)
-		X := from + centerX
-		Y := -frame + centerY
-		for polarity := 1; polarity >= -1; polarity -= 2 {
-			for axis := 0; axis <= 1; axis++ {
-				if frame > limit[!isChangeX][lastPolarity] {
-					continue
-				}
-
-				var to int
-				if limit[isChangeX][polarity] > frame {
-					to = frame
-				} else {
-					to = limit[isChangeX][polarity]
-				}
-
-				if limit[isChangeX][polarity*-1] > from {
-					from = limit[isChangeX][polarity*-1]
-				}
-
-				for j := from; j <= to; j++ {
-					if isChangeX {
-						X = j*polarity + centerX
-					} else {
-						Y = j*polarity + centerY
-					}
-
-					if matrix[X][Y] == true {
-						return X, Y
-					}
-				}
-				isChangeX = !isChangeX
-				lastPolarity = polarity
-			}
-		}
-	}
+func (o *Explore) goal() {
+	o.pos = o.ai.area.Closest(o.ant.Pos, unknownField)
 }
 
-func (o *attack) goal() {
-
+func (o *Attack) goal() {
+	o.pos = o.ant.Pos.CalcNearest(o.ai.enemyAnthills)
 }
