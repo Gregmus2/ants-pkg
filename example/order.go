@@ -13,7 +13,7 @@ type Order interface {
 }
 
 type baseOrder struct {
-	ant      *ant
+	ant      *Ant
 	hasOrder bool
 	pos      *pkg.Pos
 	action   pkg.Action
@@ -33,7 +33,7 @@ type Defend struct {
 	target *pkg.Pos
 }
 
-func giveOrder(ant *ant, greg *AI) (*pkg.Pos, pkg.Action) {
+func giveOrder(ant *Ant, greg *AI) (*pkg.Pos, pkg.Action) {
 	if ant.Order == nil {
 		base := baseOrder{ant: ant, ai: greg}
 		switch ant.Role {
@@ -80,7 +80,7 @@ func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	}
 
 	if foodPos != nil {
-		// todo add birth handler (you should know about new ant)
+		// todo add birth handler (you should know about new Ant)
 		return foodPos, pkg.EatAction, true
 	}
 
@@ -104,7 +104,11 @@ func (o *baseOrder) hasGoal() bool {
 
 func (o *Defend) goal() {
 	if o.target == nil {
-		o.target = o.ant.Pos.CalcNearest(o.ai.anthills)
+		positions := make([]*pkg.Pos, 0, len(o.ai.anthills))
+		for _, anthill := range o.ai.anthills {
+			positions = append(positions, anthill.Pos)
+		}
+		o.target = o.ant.Pos.CalcNearest(positions)
 		/*
 			Calc nearest guard position of target anthill
 			p - guard position; t - target anthill
