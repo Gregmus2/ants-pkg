@@ -2,15 +2,8 @@ package pkg
 
 import "math"
 
-type Algorithm interface {
-	Do(antID int, fields [5][5]FieldType, round int, posDiff *Pos) (target *Pos, action Action)
-	OnAntDie(antID int)
-	OnAnthillDie(anthillID int)
-	OnAntBirth(antID int, anthillID int)
-	OnNewAnthill(invaderID int, birthPos *Pos) // antID; position relative anthill
-}
-
 type Pos struct{ X, Y int }
+type PosCollection []*Pos
 
 func (p Pos) Add(pos *Pos) {
 	p.X += pos.X
@@ -44,4 +37,14 @@ func (p *Pos) CalcDist(b *Pos) int {
 	}
 
 	return int(dist)
+}
+
+func (pc PosCollection) Remove(x, y int) PosCollection {
+	for i, p := range pc {
+		if p.X == x && p.Y == y {
+			return append(pc[:i], pc[i+1:]...)
+		}
+	}
+
+	return pc
 }

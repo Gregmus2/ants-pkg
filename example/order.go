@@ -60,17 +60,17 @@ func giveOrder(ant *Ant, greg *AI) (*pkg.Pos, pkg.Action) {
 func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	var foodPos *pkg.Pos
 	var enemyPos *pkg.Pos
-	for x := o.ant.Pos.X - 1; x <= o.ant.Pos.X+1; x++ {
-		for y := o.ant.Pos.Y - 1; y <= o.ant.Pos.Y+1; y++ {
+	for x := o.ant.Pos.X - 2; x <= o.ant.Pos.X+2; x++ {
+		for y := o.ant.Pos.Y - 2; y <= o.ant.Pos.Y+2; y++ {
 			switch o.ai.area[x][y] {
 			// primary goal it's enemy anthill
 			// todo add Enemy|Ally AnthillField logic to main app
 			case pkg.EnemyAnthillField:
-				return o.ant.RelativePos(x, y), pkg.AttackAction, true
+				return o.ant.RelativeNearestPos(x, y), pkg.AttackAction, true
 			case pkg.EnemyField:
-				enemyPos = o.ant.RelativePos(x, y)
+				enemyPos = o.ant.RelativeNearestPos(x, y)
 			case pkg.FoodField:
-				foodPos = o.ant.RelativePos(x, y)
+				foodPos = o.ant.RelativeNearestPos(x, y)
 			}
 		}
 	}
@@ -80,7 +80,6 @@ func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	}
 
 	if foodPos != nil {
-		// todo add birth handler (you should know about new Ant)
 		return foodPos, pkg.EatAction, true
 	}
 
@@ -148,5 +147,6 @@ func (o *Explore) goal() {
 }
 
 func (o *Attack) goal() {
+	// todo small steps
 	o.pos = o.ant.Pos.CalcNearest(o.ai.enemyAnthills)
 }

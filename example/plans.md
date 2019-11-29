@@ -1,0 +1,1 @@
+* obsolete fields in area 

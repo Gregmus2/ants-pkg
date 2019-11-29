@@ -9,8 +9,8 @@ type AI struct {
 	area          Area // prospective area
 	ants          map[int]*Ant
 	anthills      map[int]*Anthill
-	mapSize       int        // prospective size of area
-	enemyAnthills []*pkg.Pos // todo handle destroy of anthill
+	mapSize       int // prospective size of area
+	enemyAnthills pkg.PosCollection
 }
 
 const unknownField pkg.FieldType = 255
@@ -20,7 +20,6 @@ func main() {
 
 }
 
-// todo add obsolete fields in area
 func init() {
 	Greg.mapSize = defaultSize
 	Greg.area = NewArea(defaultSize, defaultSize)
@@ -29,15 +28,10 @@ func init() {
 	birthPoint := defaultSize / 2
 	Greg.area[birthPoint][birthPoint] = pkg.AllyField
 	Greg.anthills = make(map[int]*Anthill)
-	Greg.enemyAnthills = make([]*pkg.Pos, 0, 1)
+	Greg.enemyAnthills = make(pkg.PosCollection, 0, 1)
 }
 
 func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
-	// todo handle wrong eating, when two ants eat one food. If you send baseOrder about eating it's no mean that you
-	// 	get new Ant. But how I can catch when new Ant birth?
-
-	// todo handle dead ants. Maybe I need one more func in Algorithm (by events? or just call Die())
-
 	currentAnt := ai.ants[antID]
 	currentAnt.Pos.Add(posDiff)
 	ai.updateArea(fields, currentAnt)
@@ -61,7 +55,7 @@ func (ai *AI) OnAntBirth(antID int, anthillID int) {
 }
 
 func (ai *AI) OnNewAnthill(invaderID int, birthPos *pkg.Pos) {
-
+	// todo
 }
 
 // update information about real area on my prospective area
@@ -75,8 +69,12 @@ func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
 				y = current.Pos.Y + dy - 3
 			}
 
-			if ai.area[x][y] != t && t == pkg.EnemyAnthillField {
-				ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: x, Y: y})
+			if ai.area[x][y] != t {
+				if t == pkg.EnemyAnthillField {
+					ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: x, Y: y})
+				} else if ai.area[x][y] == pkg.EnemyAnthillField {
+					ai.enemyAnthills = ai.enemyAnthills.Remove(x, y)
+				}
 			}
 
 			ai.area[x][y] = t
