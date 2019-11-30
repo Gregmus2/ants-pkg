@@ -146,6 +146,7 @@ func (o *Explore) goal() {
 	o.pos = o.ai.area.Closest(o.ant.Pos, unknownField)
 }
 
+// todo we need to create teams for attack
 func (o *Attack) goal() {
 	// todo small steps
 	o.pos = o.ant.Pos.CalcNearest(o.ai.enemyAnthills)

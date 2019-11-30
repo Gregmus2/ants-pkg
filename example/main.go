@@ -6,10 +6,9 @@ import (
 
 // todo tests
 type AI struct {
-	area          Area // prospective area
+	area          *Area // prospective area
 	ants          map[int]*Ant
 	anthills      map[int]*Anthill
-	mapSize       int // prospective size of area
 	enemyAnthills pkg.PosCollection
 }
 
@@ -21,12 +20,11 @@ func main() {
 }
 
 func init() {
-	Greg.mapSize = defaultSize
 	Greg.area = NewArea(defaultSize, defaultSize)
 	Greg.ants = make(map[int]*Ant)
 	// for the beginning I guess that my birth point in the center of prospective area
 	birthPoint := defaultSize / 2
-	Greg.area[birthPoint][birthPoint] = pkg.AllyField
+	Greg.area.matrix[birthPoint][birthPoint] = pkg.AllyField
 	Greg.anthills = make(map[int]*Anthill)
 	Greg.enemyAnthills = make(pkg.PosCollection, 0, 1)
 }
@@ -62,34 +60,31 @@ func (ai *AI) OnNewAnthill(invaderID int, birthPos *pkg.Pos) {
 func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
 	for dx := range fields {
 		for dy, t := range fields[dx] {
-			x := current.Pos.X + dx - 3
-			y := current.Pos.Y + dy - 3
-			if rewriteMap(x, y, t) {
-				x = current.Pos.X + dx - 3
-				y = current.Pos.Y + dy - 3
+			x := current.Pos.X + dx - 2
+			y := current.Pos.Y + dy - 2
+			if ai.area.RewriteMap(x, y, t) {
+				x = current.Pos.X + dx - 2
+				y = current.Pos.Y + dy - 2
 			}
 
-			if ai.area[x][y] != t {
+			if ai.area.matrix[x][y] != t {
 				if t == pkg.EnemyAnthillField {
 					ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: x, Y: y})
-				} else if ai.area[x][y] == pkg.EnemyAnthillField {
+				} else if ai.area.matrix[x][y] == pkg.EnemyAnthillField {
 					ai.enemyAnthills = ai.enemyAnthills.Remove(x, y)
 				}
 			}
 
-			ai.area[x][y] = t
+			ai.area.matrix[x][y] = t
 		}
 	}
 }
 
-// todo if Ant go to explorer (no enemies or food near here) and somewhere we found food, Ant have to go there
-
-// when we go beyond the intended map or get wall as a edge, we need to update our idea of map size
-func rewriteMap(x, y int, t pkg.FieldType) bool {
-	//t == pkg.NoField || t == pkg.WallField || x < 0 || y < 0 || x > mapSize || y > mapSize
-}
-
-// todo when we explored half part of map, we need to reorder all ants
+/*
+	todo when we explored half part of map, we need to reorder all ants. When we have not unknown fields,
+		we need to explore edges. When we know all edges,
+		we no need explorers or we need to give them another algorithm
+*/
 func (ai *AI) getActualRole() Role {
 	antCount := len(ai.ants)
 

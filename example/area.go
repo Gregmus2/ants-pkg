@@ -2,24 +2,31 @@ package example
 
 import pkg "github.com/gregmus2/ants-pkg"
 
-type Area [][]pkg.FieldType
+type Area struct {
+	w, h   int
+	matrix [][]pkg.FieldType
+}
 
-func NewArea(w, h int) Area {
-	area := make(Area, w)
-	for x := range area {
-		area[x] = make([]pkg.FieldType, h)
-		for y := range area[x] {
-			area[x][y] = unknownField
+func NewArea(w, h int) *Area {
+	matrix := make([][]pkg.FieldType, w)
+	for x := range matrix {
+		matrix[x] = make([]pkg.FieldType, h)
+		for y := range matrix[x] {
+			matrix[x][y] = unknownField
 		}
 	}
 
-	return area
+	return &Area{
+		w:      w,
+		h:      h,
+		matrix: matrix,
+	}
 }
 
 func (a Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 	// limitations for every direction in order: > v < ^
 	directions := []int{
-		len(a) - 1 - point.X, len(a[0]) - 1 - point.Y,
+		a.w - 1 - point.X, a.h - 1 - point.Y,
 		point.X, point.Y,
 	}
 	// map[X|Y][polarity(-1|1)] = limit for this direction
@@ -80,7 +87,7 @@ func (a Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 						y = j*polarity + point.Y
 					}
 
-					if a[x][y] == sought {
+					if a.matrix[x][y] == sought {
 						return &pkg.Pos{X: x, Y: y}
 					}
 				}
@@ -90,4 +97,81 @@ func (a Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 			}
 		}
 	}
+
+	return nil
+}
+
+// when we go beyond the intended map or get wall as a edge, we need to update our idea of map size
+func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
+	if t == pkg.NoField || (nX > 0 && nY > 0 && nX < a.w && nY < a.h) {
+		return false
+	}
+
+	// todo handle wall and noField case, when we need to make area shorter
+
+	if nX > a.w {
+		for x := a.w; x < a.w*2; x++ {
+			a.matrix = append(a.matrix, make([]pkg.FieldType, a.h))
+			for y := range a.matrix[x] {
+				a.matrix[x][y] = unknownField
+			}
+		}
+
+		a.w = a.w * 2
+	}
+
+	if nY > a.h {
+		for y := a.h; y < a.h*2; y++ {
+			for x := range a.matrix {
+				a.matrix[x] = append(a.matrix[x], unknownField)
+			}
+		}
+
+		a.h = a.h * 2
+	}
+
+	if nX < 0 {
+		expandedMatrix := make([][]pkg.FieldType, a.w*2)
+		// fill new part
+		for x := 0; x < a.w; x++ {
+			expandedMatrix[x] = make([]pkg.FieldType, a.h)
+			for y := range expandedMatrix[x] {
+				expandedMatrix[x][y] = unknownField
+			}
+		}
+
+		// fill old part
+		for x := a.w; x < a.w*2; x++ {
+			expandedMatrix[x] = make([]pkg.FieldType, a.h)
+			for y := range expandedMatrix[x] {
+				expandedMatrix[x][y] = a.matrix[x-a.w][y]
+			}
+		}
+
+		a.w = a.w * 2
+		a.matrix = expandedMatrix
+	}
+
+	if nY < 0 {
+		expandedMatrix := make([][]pkg.FieldType, a.w)
+		// fill new part
+		for x := range expandedMatrix {
+			expandedMatrix[x] = make([]pkg.FieldType, a.h*2)
+			for y := 0; y < a.h; y++ {
+				expandedMatrix[x][y] = unknownField
+			}
+		}
+
+		// fill old part
+		for x := range expandedMatrix {
+			for y := a.h; y < a.h*2; y++ {
+				expandedMatrix[x][y] = a.matrix[x][y-a.h]
+			}
+		}
+
+		a.h = a.h * 2
+		a.matrix = expandedMatrix
+	}
+
+	return true
 }
