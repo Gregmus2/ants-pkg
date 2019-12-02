@@ -19,14 +19,22 @@ func main() {
 
 }
 
-func init() {
-	Greg.area = NewArea(defaultSize, defaultSize)
-	Greg.ants = make(map[int]*Ant)
+func NewAI() AI {
 	// for the beginning I guess that my birth point in the center of prospective area
 	birthPoint := defaultSize / 2
-	Greg.area.matrix[birthPoint][birthPoint] = pkg.AllyField
-	Greg.anthills = make(map[int]*Anthill)
-	Greg.enemyAnthills = make(pkg.PosCollection, 0, 1)
+	ai := AI{
+		area:          NewArea(defaultSize, defaultSize),
+		ants:          make(map[int]*Ant),
+		anthills:      make(map[int]*Anthill),
+		enemyAnthills: make(pkg.PosCollection, 0, 1),
+	}
+	ai.area.matrix[birthPoint][birthPoint] = pkg.AllyField
+
+	return ai
+}
+
+func init() {
+	Greg = NewAI()
 }
 
 func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
@@ -34,7 +42,7 @@ func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.
 	currentAnt.Pos.Add(posDiff)
 	ai.updateArea(fields, currentAnt)
 
-	return giveOrder(currentAnt, ai)
+	return GiveOrder(currentAnt, ai)
 }
 
 func (ai *AI) OnAntDie(antID int) {

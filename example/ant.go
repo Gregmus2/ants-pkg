@@ -18,9 +18,9 @@ func (a *Ant) RelativePos(x int, y int) *pkg.Pos {
 	}
 }
 
-func (a *Ant) RelativeNearestPos(x int, y int) *pkg.Pos {
-	targetX := x - a.Pos.X + 2
-	targetY := y - a.Pos.Y + 2
+func (a *Ant) CalcStep(x int, y int) *pkg.Pos {
+	targetX := x - a.Pos.X
+	targetY := y - a.Pos.Y
 	if targetX > 1 || targetX < -1 {
 		targetX = int(float64(targetX) / math.Abs(float64(targetX)))
 	}

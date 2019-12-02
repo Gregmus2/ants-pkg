@@ -33,17 +33,9 @@ type Defend struct {
 	target *pkg.Pos
 }
 
-func giveOrder(ant *Ant, greg *AI) (*pkg.Pos, pkg.Action) {
+func GiveOrder(ant *Ant, greg *AI) (*pkg.Pos, pkg.Action) {
 	if ant.Order == nil {
-		base := baseOrder{ant: ant, ai: greg}
-		switch ant.Role {
-		case explorer:
-			ant.Order = &Explore{baseOrder: base}
-		case defender:
-			ant.Order = &Defend{baseOrder: base}
-		case attacker:
-			ant.Order = &Attack{baseOrder: base}
-		}
+		ant.Order = GetOrder(ant, greg)
 	}
 
 	if pos, action, ok := ant.Order.urgent(); ok {
@@ -57,20 +49,34 @@ func giveOrder(ant *Ant, greg *AI) (*pkg.Pos, pkg.Action) {
 	return ant.Order.follow()
 }
 
+func GetOrder(ant *Ant, ai *AI) Order {
+	base := baseOrder{ant: ant, ai: ai}
+	switch ant.Role {
+	case explorer:
+		return &Explore{baseOrder: base}
+	case defender:
+		return &Defend{baseOrder: base}
+	case attacker:
+		return &Attack{baseOrder: base}
+	}
+
+	return nil
+}
+
 func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	var foodPos *pkg.Pos
 	var enemyPos *pkg.Pos
 	for x := o.ant.Pos.X - 2; x <= o.ant.Pos.X+2; x++ {
 		for y := o.ant.Pos.Y - 2; y <= o.ant.Pos.Y+2; y++ {
-			switch o.ai.area[x][y] {
+			switch o.ai.area.matrix[x][y] {
 			// primary goal it's enemy anthill
 			// todo add Enemy|Ally AnthillField logic to main app
 			case pkg.EnemyAnthillField:
-				return o.ant.RelativeNearestPos(x, y), pkg.AttackAction, true
+				return o.ant.CalcStep(x, y), pkg.AttackAction, true
 			case pkg.EnemyField:
-				enemyPos = o.ant.RelativeNearestPos(x, y)
+				enemyPos = o.ant.CalcStep(x, y)
 			case pkg.FoodField:
-				foodPos = o.ant.RelativeNearestPos(x, y)
+				foodPos = o.ant.CalcStep(x, y)
 			}
 		}
 	}
@@ -89,10 +95,17 @@ func (o *baseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 // it's about long-term goal based on Role. Like explorer or go to capture enemy anthill
 func (o *baseOrder) follow() (*pkg.Pos, pkg.Action) {
 	// todo check for obstacles
-	diffX := o.pos.X - o.ant.Pos.X
-	deltaX := diffX / int(math.Abs(float64(diffX)))
-	diffY := o.pos.Y - o.ant.Pos.Y
-	deltaY := diffY / int(math.Abs(float64(diffY)))
+	deltaX := 0
+	if o.pos.X != o.ant.Pos.X {
+		diffX := o.pos.X - o.ant.Pos.X
+		deltaX = diffX / int(math.Abs(float64(diffX)))
+	}
+
+	deltaY := 0
+	if o.pos.Y != o.ant.Pos.Y {
+		diffY := o.pos.Y - o.ant.Pos.Y
+		deltaY = diffY / int(math.Abs(float64(diffY)))
+	}
 
 	return &pkg.Pos{X: deltaX, Y: deltaY}, pkg.MoveAction
 }

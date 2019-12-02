@@ -131,7 +131,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
 	}
 
 	if nX < 0 {
-		expandedMatrix := make([][]pkg.FieldType, a.w*2)
+		expandedMatrix := make([][]pkg.FieldType, a.w, a.w*2)
 		// fill new part
 		for x := 0; x < a.w; x++ {
 			expandedMatrix[x] = make([]pkg.FieldType, a.h)
@@ -141,12 +141,13 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
 		}
 
 		// fill old part
-		for x := a.w; x < a.w*2; x++ {
-			expandedMatrix[x] = make([]pkg.FieldType, a.h)
-			for y := range expandedMatrix[x] {
-				expandedMatrix[x][y] = a.matrix[x-a.w][y]
-			}
-		}
+		expandedMatrix = append(expandedMatrix, a.matrix...)
+		//for x := a.w; x < a.w*2; x++ {
+		//	expandedMatrix[x] = make([]pkg.FieldType, a.h)
+		//	for y := range expandedMatrix[x] {
+		//		expandedMatrix[x][y] = a.matrix[x-a.w][y]
+		//	}
+		//}
 
 		a.w = a.w * 2
 		a.matrix = expandedMatrix
