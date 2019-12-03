@@ -1,6 +1,9 @@
 package example
 
-import pkg "github.com/gregmus2/ants-pkg"
+import (
+	pkg "github.com/gregmus2/ants-pkg"
+	"math"
+)
 
 type Area struct {
 	w, h   int
@@ -76,8 +79,8 @@ func (a Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 				}
 
 				from := baseFrom
-				if limit[xLine][polarity*-1] > from {
-					from = limit[xLine][polarity*-1]
+				if limit[xLine][polarity*-1] < int(math.Abs(float64(from))) {
+					from = -limit[xLine][polarity*-1]
 				}
 
 				for j := from; j <= to; j++ {
