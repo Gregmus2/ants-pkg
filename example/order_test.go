@@ -25,7 +25,7 @@ func TestGiveOrder(t *testing.T) {
 	}
 
 	if pos.X != 1 || pos.Y != 0 || action != pkg.MoveAction {
-		t.Errorf("Wrong calculated pos or action: %v, %d", pos, action)
+		t.Errorf("Wrong calculation of pos or action: %v, %d", pos, action)
 	}
 }
 
@@ -36,7 +36,7 @@ func TestGiveOrderWithUrgent(t *testing.T) {
 
 	pos, action := GiveOrder(ant, &ai)
 	if pos.X != -1 || pos.Y != 1 || action != pkg.EatAction {
-		t.Errorf("Wrong calculated pos or action: %v, %d", pos, action)
+		t.Errorf("Wrong calculation of pos or action: %v, %d", pos, action)
 	}
 }
 
@@ -46,20 +46,20 @@ func TestUrgent(t *testing.T) {
 
 	pos, action, ok := ant.Order.urgent()
 	if pos.X != 0 || pos.Y != 0 || action != 0 || ok == true {
-		t.Errorf("Wrong calculated pos or action: %v, %d, %v", pos, action, ok)
+		t.Errorf("Wrong calculation of pos or action: %v, %d, %v", pos, action, ok)
 	}
 
 	ai.area.matrix[defaultSize/2-1][defaultSize/2+1] = pkg.FoodField
 
 	pos, action, ok = ant.Order.urgent()
 	if pos.X != -1 || pos.Y != 1 || action != pkg.EatAction || ok == false {
-		t.Errorf("Wrong calculated pos or action: %v, %d", pos, action)
+		t.Errorf("Wrong calculation of pos or action: %v, %d", pos, action)
 	}
 
 	ai.area.matrix[defaultSize/2+1][defaultSize/2] = pkg.EnemyAnthillField
 	pos, action, ok = ant.Order.urgent()
 	if pos.X != 1 || pos.Y != 0 || action != pkg.AttackAction || ok == false {
-		t.Errorf("Wrong calculated pos or action: %v, %d", pos, action)
+		t.Errorf("Wrong calculation of pos or action: %v, %d", pos, action)
 	}
 }
 
@@ -71,11 +71,11 @@ func TestUrgentEnemyPriority(t *testing.T) {
 
 	pos, action := GiveOrder(ant, &ai)
 	if action != pkg.AttackAction {
-		t.Errorf("Wrong calculated action: %d", action)
+		t.Errorf("Wrong calculation of action: %d", action)
 	}
 
 	if pos.X != 1 || pos.Y != 0 {
-		t.Errorf("Wrong calculated pos or action. Expected: %v, actual: %v", &pkg.Pos{X: 1}, pos)
+		t.Errorf("Wrong calculation of pos or action. Expected: %v, actual: %v", &pkg.Pos{X: 1}, pos)
 	}
 }
 
@@ -95,11 +95,11 @@ func TestFollow(t *testing.T) {
 		explore.Pos = goal
 		pos, action := ant.Order.follow()
 		if action != pkg.MoveAction {
-			t.Errorf("Wrong calculated action: %d", action)
+			t.Errorf("Wrong calculation of action: %d", action)
 		}
 
 		if pos.X != step.X || pos.Y != step.Y {
-			t.Errorf("Wrong calculated pos. Expected: %v, actual: %v", step, pos)
+			t.Errorf("Wrong calculation of pos. Expected: %v, actual: %v", step, pos)
 		}
 	}
 }
@@ -121,14 +121,14 @@ func TestExploreGoal(t *testing.T) {
 
 	ant.Order.goal()
 	if explore.Pos.X != nearestPos.X && explore.Pos.Y != nearestPos.Y {
-		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", nearestPos, explore.Pos)
+		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", nearestPos, explore.Pos)
 	}
 
 	ai.area.matrix[defaultSize/2+5][defaultSize/2-5] = unknownField
 
 	ant.Order.goal()
 	if explore.Pos.X != nearestPos.X && explore.Pos.Y != nearestPos.Y {
-		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: 5, Y: -5}, explore.Pos)
+		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: 5, Y: -5}, explore.Pos)
 	}
 }
 
@@ -144,16 +144,16 @@ func TestDefendGoal(t *testing.T) {
 
 	ant.Order.goal()
 	if defend.Pos.X != defaultSize/2-1 && defend.Pos.Y != defaultSize/2 {
-		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize / 2}, defend.Pos)
+		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize / 2}, defend.Pos)
 	}
 	if defend.target.X != defaultSize/2-3 && defend.target.Y != defaultSize/2+2 {
-		t.Errorf("Wrong calculated target. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 3, Y: defaultSize/2 + 2}, defend.target)
+		t.Errorf("Wrong calculation of target. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 3, Y: defaultSize/2 + 2}, defend.target)
 	}
 
 	ant.Pos.X = defaultSize/2 - 1
 
 	ant.Order.goal()
 	if defend.Pos.X != defaultSize/2-1 && defend.Pos.Y != defaultSize/2+4 {
-		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize/2 + 4}, defend.Pos)
+		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize/2 + 4}, defend.Pos)
 	}
 }

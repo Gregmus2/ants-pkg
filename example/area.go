@@ -106,12 +106,13 @@ func (a Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 
 // when we go beyond the intended map or get wall as a edge, we need to update our idea of map size
 func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
-	if t == pkg.NoField || (nX > 0 && nY > 0 && nX < a.w && nY < a.h) {
+	if t == pkg.NoField || (nX >= 0 && nY >= 0 && nX < a.w && nY < a.h) {
 		return false
 	}
 
 	// todo handle wall and noField case, when we need to make area shorter
 
+	// todo we need to change ants and anthills pos properties (like ai.anthills & ai.ants)
 	if nX > a.w {
 		for x := a.w; x < a.w*2; x++ {
 			a.matrix = append(a.matrix, make([]pkg.FieldType, a.h))
