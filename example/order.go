@@ -148,9 +148,12 @@ func (o *Defend) goal() {
 			 p<--p
 		-2|+2	  +2|+2
 	*/
+
+	relativeX := o.Ant.Pos.X - o.target.X
+	relativeY := o.Ant.Pos.Y - o.target.Y
 	o.Pos = &pkg.Pos{
-		X: (0 - o.target.X/o.target.Y) * o.target.X,
-		Y: o.target.X / o.target.Y * o.target.Y,
+		X: (0-relativeX/relativeY)*relativeX + o.target.X,
+		Y: relativeX/relativeY*relativeY + o.target.Y,
 	}
 }
 

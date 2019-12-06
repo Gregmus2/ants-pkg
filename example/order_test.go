@@ -115,18 +115,45 @@ func TestExploreGoal(t *testing.T) {
 		}
 	}
 
+	nearestPos := &pkg.Pos{X: defaultSize/2 - 11, Y: defaultSize/2 - 5}
 	ai.area.matrix[defaultSize/2-10][defaultSize/2-5] = unknownField
-	ai.area.matrix[defaultSize/2-11][defaultSize/2-5] = unknownField
+	ai.area.matrix[nearestPos.X][nearestPos.Y] = unknownField
 
 	ant.Order.goal()
-	if explore.Pos.X != 39 && explore.Pos.Y != 45 {
-		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: 39, Y: 45}, explore.Pos)
+	if explore.Pos.X != nearestPos.X && explore.Pos.Y != nearestPos.Y {
+		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", nearestPos, explore.Pos)
 	}
 
 	ai.area.matrix[defaultSize/2+5][defaultSize/2-5] = unknownField
 
 	ant.Order.goal()
-	if explore.Pos.X != 39 && explore.Pos.Y != 45 {
+	if explore.Pos.X != nearestPos.X && explore.Pos.Y != nearestPos.Y {
 		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: 5, Y: -5}, explore.Pos)
+	}
+}
+
+func TestDefendGoal(t *testing.T) {
+	ai, ant := setup()
+	defend := &Defend{BaseOrder: BaseOrder{Ant: ant, AI: &ai}, target: nil}
+	ant.Order = defend
+
+	ai.anthills[0] = &Anthill{
+		Pos:      &pkg.Pos{X: defaultSize/2 - 3, Y: defaultSize/2 + 2},
+		BirthPos: &pkg.Pos{X: defaultSize/2 - 4, Y: defaultSize/2 + 3},
+	}
+
+	ant.Order.goal()
+	if defend.Pos.X != defaultSize/2-1 && defend.Pos.Y != defaultSize/2 {
+		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize / 2}, defend.Pos)
+	}
+	if defend.target.X != defaultSize/2-3 && defend.target.Y != defaultSize/2+2 {
+		t.Errorf("Wrong calculated target. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 3, Y: defaultSize/2 + 2}, defend.target)
+	}
+
+	ant.Pos.X = defaultSize/2 - 1
+
+	ant.Order.goal()
+	if defend.Pos.X != defaultSize/2-1 && defend.Pos.Y != defaultSize/2+4 {
+		t.Errorf("Wrong calculated goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize/2 + 4}, defend.Pos)
 	}
 }
