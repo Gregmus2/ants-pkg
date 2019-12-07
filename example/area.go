@@ -26,7 +26,11 @@ func NewArea(w, h int) *Area {
 	}
 }
 
-func (a Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
+func (a *Area) SetByPos(pos *pkg.Pos, field pkg.FieldType) {
+	a.matrix[pos.X][pos.Y] = field
+}
+
+func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 	// limitations for every direction in order: > v < ^
 	directions := []int{
 		a.w - 1 - point.X, a.h - 1 - point.Y,

@@ -19,22 +19,29 @@ func main() {
 
 }
 
-func NewAI() AI {
+func NewAI(birthRelativePos *pkg.Pos, anthillID int) AI {
+	anthillPos := &pkg.Pos{X: defaultSize / 2, Y: defaultSize / 2}
+	birthRelativePos.Add(anthillPos)
 	// for the beginning I guess that my birth point in the center of prospective area
-	birthPoint := defaultSize / 2
 	ai := AI{
 		area:          NewArea(defaultSize, defaultSize),
 		ants:          make(map[int]*Ant),
 		anthills:      make(map[int]*Anthill),
 		enemyAnthills: make(pkg.PosCollection, 0, 1),
 	}
-	ai.area.matrix[birthPoint][birthPoint] = pkg.AllyField
+	ai.area.SetByPos(anthillPos, pkg.AllyAnthillField)
+	ai.area.SetByPos(birthRelativePos, pkg.AllyAnthillField)
+
+	ai.anthills[anthillID] = &Anthill{
+		Pos:      &pkg.Pos{X: defaultSize / 2, Y: defaultSize / 2},
+		BirthPos: birthRelativePos,
+	}
 
 	return ai
 }
 
-func init() {
-	Greg = NewAI()
+func (ai *AI) Start(anthillID int, birthPos *pkg.Pos) {
+	Greg = NewAI(birthPos, anthillID)
 }
 
 func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
@@ -46,22 +53,31 @@ func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.
 }
 
 func (ai *AI) OnAntDie(antID int) {
+	ai.area.SetByPos(ai.ants[antID].Pos, pkg.EmptyField)
 	delete(ai.ants, antID)
 }
 
 func (ai *AI) OnAnthillDie(anthillID int) {
+	ai.area.SetByPos(ai.anthills[anthillID].Pos, pkg.EnemyAnthillField)
 	delete(ai.anthills, anthillID)
 }
 
 func (ai *AI) OnAntBirth(antID int, anthillID int) {
+	ai.area.SetByPos(ai.anthills[anthillID].BirthPos, pkg.AllyField)
 	ai.ants[antID] = &Ant{
 		Pos:  ai.anthills[anthillID].BirthPos,
 		Role: ai.getActualRole(),
 	}
 }
 
-func (ai *AI) OnNewAnthill(invaderID int, birthPos *pkg.Pos) {
-	// todo
+func (ai *AI) OnNewAnthill(invaderID int, birthPos *pkg.Pos, anthillID int) {
+	pos := ai.area.Closest(ai.ants[invaderID].Pos, pkg.EnemyAnthillField)
+	ai.area.SetByPos(pos, pkg.AllyAnthillField)
+	birthPos.Add(pos)
+	ai.anthills[anthillID] = &Anthill{
+		Pos:      pos,
+		BirthPos: birthPos,
+	}
 }
 
 // update information about real area on my prospective area

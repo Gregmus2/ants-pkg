@@ -6,7 +6,7 @@ import (
 )
 
 func setup() (AI, *Ant) {
-	ai := NewAI()
+	ai := NewAI(&pkg.Pos{X: 1}, 1)
 	ant := &Ant{
 		Pos:  &pkg.Pos{X: defaultSize / 2, Y: defaultSize / 2},
 		Role: attacker,
