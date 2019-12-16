@@ -13,6 +13,6 @@ func TestAI_OnAntBirth(t *testing.T) {
 	}
 }
 
-func BenchmarkAI_OnAntDie(b *testing.B) {
+func TestAI_OnAntDie(t *testing.T) {
 	ai := NewAI(&pkg.Pos{1, 0}, 1)
 }
