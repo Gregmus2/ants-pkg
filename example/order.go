@@ -57,9 +57,9 @@ func GetOrder(ant *Ant, ai *AI) Order {
 		return &Defend{BaseOrder: base}
 	case attacker:
 		return &Attack{BaseOrder: base}
+	default:
+		return &Explore{BaseOrder: base}
 	}
-
-	return nil
 }
 
 func (o *BaseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {

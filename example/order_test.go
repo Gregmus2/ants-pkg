@@ -17,15 +17,33 @@ func setup() (AI, *Ant) {
 func TestGiveOrder(t *testing.T) {
 	ai, ant := setup()
 	ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: defaultSize - 10, Y: defaultSize / 2})
-
 	pos, action := GiveOrder(ant, &ai)
-
 	if _, ok := ant.Order.(*Attack); !ok {
 		t.Error("Wrong order was set")
 	}
-
 	if pos.X != 1 || pos.Y != 0 || action != pkg.MoveAction {
 		t.Errorf("Wrong calculation of pos or action: %v, %d", pos, action)
+	}
+
+	ant.Order = nil
+	ant.Role = explorer
+	pos, action = GiveOrder(ant, &ai)
+	if _, ok := ant.Order.(*Explore); !ok {
+		t.Error("Wrong order was set")
+	}
+
+	ant.Order = nil
+	ant.Role = defender
+	pos, action = GiveOrder(ant, &ai)
+	if _, ok := ant.Order.(*Defend); !ok {
+		t.Error("Wrong order was set")
+	}
+
+	ant.Order = nil
+	ant.Role = 9
+	pos, action = GiveOrder(ant, &ai)
+	if _, ok := ant.Order.(*Explore); !ok {
+		t.Error("Wrong order was set")
 	}
 }
 
@@ -136,24 +154,21 @@ func TestDefendGoal(t *testing.T) {
 	ai, ant := setup()
 	defend := &Defend{BaseOrder: BaseOrder{Ant: ant, AI: &ai}, target: nil}
 	ant.Order = defend
-
-	ai.anthills[0] = &Anthill{
-		Pos:      &pkg.Pos{X: defaultSize/2 - 3, Y: defaultSize/2 + 2},
-		BirthPos: &pkg.Pos{X: defaultSize/2 - 4, Y: defaultSize/2 + 3},
-	}
+	ant.Pos.X = defaultSize/2 + 3
+	ant.Pos.Y = defaultSize/2 - 2
 
 	ant.Order.goal()
-	if defend.Pos.X != defaultSize/2-1 && defend.Pos.Y != defaultSize/2 {
-		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize / 2}, defend.Pos)
+	if defend.Pos.X != defaultSize/2+2 && defend.Pos.Y != defaultSize/2-2 {
+		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 + 3, Y: defaultSize/2 - 2}, defend.Pos)
 	}
-	if defend.target.X != defaultSize/2-3 && defend.target.Y != defaultSize/2+2 {
-		t.Errorf("Wrong calculation of target. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 3, Y: defaultSize/2 + 2}, defend.target)
+	if defend.target.X != defaultSize/2 && defend.target.Y != defaultSize/2 {
+		t.Errorf("Wrong calculation of target. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize / 2, Y: defaultSize / 2}, defend.target)
 	}
 
-	ant.Pos.X = defaultSize/2 - 1
+	ant.Pos.X = ant.Pos.X - 1
 
 	ant.Order.goal()
-	if defend.Pos.X != defaultSize/2-1 && defend.Pos.Y != defaultSize/2+4 {
-		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 - 1, Y: defaultSize/2 + 4}, defend.Pos)
+	if defend.Pos.X != defaultSize/2+2 && defend.Pos.Y != defaultSize/2+2 {
+		t.Errorf("Wrong calculation of goal. Expected: %v, actual: %v", &pkg.Pos{X: defaultSize/2 + 2, Y: defaultSize/2 + 2}, defend.Pos)
 	}
 }

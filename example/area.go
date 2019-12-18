@@ -52,6 +52,11 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 	xLine := true
 	lastPolarity := -1
 	for frame := 1; frame <= lastFrame; frame++ {
+		/* s - start (x, y)
+		^s-->
+		|-p-|
+		<---v
+		*/
 		baseFrom := -(frame - 1)
 		x := baseFrom + point.X
 		y := -frame + point.X
@@ -71,7 +76,18 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 				x x x x y
 			*/
 			for axis := 0; axis <= 1; axis++ {
+				// if we trying to check x line out of map (negative)
+				if xLine == true && y < 0 {
+					x = frame
+					xLine = !xLine
+					lastPolarity = polarity
+					continue
+				}
+
+				// if we trying to check line out of map (positive)
 				if frame > limit[!xLine][lastPolarity] {
+					xLine = !xLine
+					lastPolarity = polarity
 					continue
 				}
 
