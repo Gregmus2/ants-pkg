@@ -30,7 +30,7 @@ func NewAI(birthRelativePos *pkg.Pos, anthillID int) AI {
 		enemyAnthills: make(pkg.PosCollection, 0, 1),
 	}
 	ai.area.SetByPos(anthillPos, pkg.AllyAnthillField)
-	ai.area.SetByPos(birthRelativePos, pkg.AllyAnthillField)
+	ai.area.SetByPos(birthRelativePos, pkg.AllyField)
 
 	ai.anthills[anthillID] = &Anthill{
 		Pos:      &pkg.Pos{X: defaultSize / 2, Y: defaultSize / 2},
@@ -86,7 +86,7 @@ func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
 		for dy, t := range fields[dx] {
 			x := current.Pos.X + dx - 2
 			y := current.Pos.Y + dy - 2
-			if ai.area.RewriteMap(x, y, t) {
+			if ai.area.RewriteMap(x, y, t, ai) {
 				x = current.Pos.X + dx - 2
 				y = current.Pos.Y + dy - 2
 			}

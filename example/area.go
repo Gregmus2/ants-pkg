@@ -125,14 +125,13 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 }
 
 // when we go beyond the intended map or get wall as a edge, we need to update our idea of map size
-func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
+func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 	if t == pkg.NoField || (nX >= 0 && nY >= 0 && nX < a.w && nY < a.h) {
 		return false
 	}
 
 	// todo handle wall and noField case, when we need to make area shorter
 
-	// todo we need to change ants and anthills pos properties (like ai.anthills & ai.ants)
 	if nX > a.w {
 		for x := a.w; x < a.w*2; x++ {
 			a.matrix = append(a.matrix, make([]pkg.FieldType, a.h))
@@ -166,12 +165,17 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
 
 		// fill old part
 		expandedMatrix = append(expandedMatrix, a.matrix...)
-		//for x := a.w; x < a.w*2; x++ {
-		//	expandedMatrix[x] = make([]pkg.FieldType, a.h)
-		//	for y := range expandedMatrix[x] {
-		//		expandedMatrix[x][y] = a.matrix[x-a.w][y]
-		//	}
-		//}
+
+		posDiff := &pkg.Pos{X: a.w}
+		for _, ant := range ai.ants {
+			ant.Pos.Add(posDiff)
+		}
+		for _, anthill := range ai.anthills {
+			anthill.Pos.Add(posDiff)
+		}
+		for _, pos := range ai.enemyAnthills {
+			pos.Add(posDiff)
+		}
 
 		a.w = a.w * 2
 		a.matrix = expandedMatrix
@@ -192,6 +196,17 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType) bool {
 			for y := a.h; y < a.h*2; y++ {
 				expandedMatrix[x][y] = a.matrix[x][y-a.h]
 			}
+		}
+
+		posDiff := &pkg.Pos{Y: a.h}
+		for _, ant := range ai.ants {
+			ant.Pos.Add(posDiff)
+		}
+		for _, anthill := range ai.anthills {
+			anthill.Pos.Add(posDiff)
+		}
+		for _, pos := range ai.enemyAnthills {
+			pos.Add(posDiff)
 		}
 
 		a.h = a.h * 2
