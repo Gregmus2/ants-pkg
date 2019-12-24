@@ -20,6 +20,22 @@ func TestAI_Do(t *testing.T) {
 	if target.X != -1 || target.Y != -1 || action != pkg.EatAction {
 		t.Error("Wrong behaviour of algorithm")
 	}
+
+	fields = [5][5]pkg.FieldType{
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+	}
+
+	target = &pkg.Pos{}
+	for i := 0; i < 10; i++ {
+		target, action = Greg.Do(1, fields, 1, target)
+		if target.X == 0 && target.Y == 0 {
+			t.Error(target)
+		}
+	}
 }
 
 func TestAI_Start(t *testing.T) {

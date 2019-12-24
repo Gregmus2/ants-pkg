@@ -109,7 +109,7 @@ func (o *BaseOrder) follow() (*pkg.Pos, pkg.Action) {
 }
 
 func (o *BaseOrder) hasGoal() bool {
-	return o.Pos != nil && o.Pos != o.Ant.Pos
+	return o.Pos != nil && !o.Pos.Equal(o.Ant.Pos)
 }
 
 func (o *Defend) goal() {

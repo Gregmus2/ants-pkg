@@ -39,6 +39,10 @@ func (p *Pos) CalcDist(b *Pos) int {
 	return int(dist)
 }
 
+func (p *Pos) Equal(pos *Pos) bool {
+	return p.X == pos.X && p.Y == pos.Y
+}
+
 func (pc PosCollection) Remove(x, y int) PosCollection {
 	for i, p := range pc {
 		if p.X == x && p.Y == y {
