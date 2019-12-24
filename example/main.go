@@ -123,7 +123,7 @@ func (ai *AI) getActualRole() Role {
 	case antCount >= 6 && antCount < 10:
 		return defender
 	default:
-		return attacker
+		return explorer
 	}
 }
 

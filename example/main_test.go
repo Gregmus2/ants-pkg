@@ -9,16 +9,16 @@ func TestAI_Do(t *testing.T) {
 	Greg.Start(1, &pkg.Pos{X: 1})
 	Greg.OnAntBirth(1, 1)
 	fields := [5][5]pkg.FieldType{
-		{pkg.FoodField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
-		{pkg.EmptyField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.FoodField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 	}
 
 	target, action := Greg.Do(1, fields, 1, &pkg.Pos{})
 	if target.X != -1 || target.Y != -1 || action != pkg.EatAction {
-		t.Error("Wrong behaviour of algorithm")
+		t.Errorf("Wrong behaviour of algorithm. %v", target)
 	}
 
 	fields = [5][5]pkg.FieldType{

@@ -63,31 +63,41 @@ func GetOrder(ant *Ant, ai *AI) Order {
 }
 
 func (o *BaseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
-	var foodPos *pkg.Pos
-	var enemyPos *pkg.Pos
+	var foodPos, enemyPos *pkg.Pos
+	var enemyIsGoal, foodIsGoal bool
 	for x := o.Ant.Pos.X - 2; x <= o.Ant.Pos.X+2; x++ {
 		for y := o.Ant.Pos.Y - 2; y <= o.Ant.Pos.Y+2; y++ {
 			switch o.AI.area.matrix[x][y] {
 			// primary goal it's enemy anthill
+			// todo get nearest food or enemy
 			case pkg.EnemyAnthillField:
-				return o.Ant.CalcStep(x, y), pkg.AttackAction, true
+				step, isGoal := o.Ant.CalcStep(x, y)
+				return o.urgentResponse(step, isGoal, pkg.AttackAction)
 			case pkg.EnemyField:
-				enemyPos = o.Ant.CalcStep(x, y)
+				enemyPos, enemyIsGoal = o.Ant.CalcStep(x, y)
 			case pkg.FoodField:
-				foodPos = o.Ant.CalcStep(x, y)
+				foodPos, foodIsGoal = o.Ant.CalcStep(x, y)
 			}
 		}
 	}
 
 	if enemyPos != nil {
-		return enemyPos, pkg.AttackAction, true
+		return o.urgentResponse(enemyPos, enemyIsGoal, pkg.AttackAction)
 	}
 
 	if foodPos != nil {
-		return foodPos, pkg.EatAction, true
+		return o.urgentResponse(foodPos, foodIsGoal, pkg.EatAction)
 	}
 
 	return &pkg.Pos{}, 0, false
+}
+
+func (o *BaseOrder) urgentResponse(pos *pkg.Pos, isGoal bool, action pkg.Action) (*pkg.Pos, pkg.Action, bool) {
+	if isGoal {
+		return pos, action, true
+	} else {
+		return pos, pkg.MoveAction, true
+	}
 }
 
 // it's about long-term goal based on Role. Like explorer or go to capture enemy anthill

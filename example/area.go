@@ -132,7 +132,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 
 	// todo handle wall and noField case, when we need to make area shorter
 
-	if nX > a.w {
+	if nX >= a.w {
 		for x := a.w; x < a.w*2; x++ {
 			a.matrix = append(a.matrix, make([]pkg.FieldType, a.h))
 			for y := range a.matrix[x] {
@@ -143,7 +143,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 		a.w = a.w * 2
 	}
 
-	if nY > a.h {
+	if nY >= a.h {
 		for y := a.h; y < a.h*2; y++ {
 			for x := range a.matrix {
 				a.matrix[x] = append(a.matrix[x], unknownField)
@@ -153,7 +153,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 		a.h = a.h * 2
 	}
 
-	if nX < 0 {
+	if nX <= 0 {
 		expandedMatrix := make([][]pkg.FieldType, a.w, a.w*2)
 		// fill new part
 		for x := 0; x < a.w; x++ {
@@ -181,7 +181,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 		a.matrix = expandedMatrix
 	}
 
-	if nY < 0 {
+	if nY <= 0 {
 		expandedMatrix := make([][]pkg.FieldType, a.w)
 		// fill new part
 		for x := range expandedMatrix {
