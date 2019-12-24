@@ -56,3 +56,21 @@ func TestAI_OnAntDie(t *testing.T) {
 		t.Error("Bad reaction on AntDie event")
 	}
 }
+
+func TestAI_OnNewAnthill(t *testing.T) {
+	ai := NewAI(&pkg.Pos{1, 0}, 1)
+	ai.area.matrix[40][40] = pkg.EnemyAnthillField
+	ai.OnAntBirth(23, 1)
+	ai.OnNewAnthill(23, &pkg.Pos{1, 1}, 2)
+	if ai.anthills[2].Pos.X != 40 || ai.anthills[2].Pos.Y != 40 {
+		t.Errorf("Wrong pos of new anthill. Expected: %d %d. Actual: %v", 40, 40, ai.ants[2].Pos)
+	}
+}
+
+func TestAI_OnAnthillDie(t *testing.T) {
+	ai := NewAI(&pkg.Pos{1, 0}, 1)
+	ai.OnAnthillDie(1)
+	if _, ok := ai.anthills[1]; ok {
+		t.Error("Bad reaction on AnthillDie event")
+	}
+}
