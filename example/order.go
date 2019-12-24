@@ -69,7 +69,6 @@ func (o *BaseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 		for y := o.Ant.Pos.Y - 2; y <= o.Ant.Pos.Y+2; y++ {
 			switch o.AI.area.matrix[x][y] {
 			// primary goal it's enemy anthill
-			// todo add Enemy|Ally AnthillField logic to main app
 			case pkg.EnemyAnthillField:
 				return o.Ant.CalcStep(x, y), pkg.AttackAction, true
 			case pkg.EnemyField:
