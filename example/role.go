@@ -1,4 +1,4 @@
-package example
+package main
 
 type Role uint8
 

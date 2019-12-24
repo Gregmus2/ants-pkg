@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	pkg "github.com/gregmus2/ants-pkg"
