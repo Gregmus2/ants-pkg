@@ -34,7 +34,7 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 	// limitations for every direction in order: > v < ^
 	directions := []int{
 		a.w - 1 - point.X, a.h - 1 - point.Y,
-		point.X, point.Y,
+		point.X - 1, point.Y - 1,
 	}
 	// map[X|Y][polarity(-1|1)] = limit for this direction
 	limit := map[bool]map[int]int{
@@ -51,6 +51,20 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 	}
 	xLine := true
 	lastPolarity := -1
+
+	// debug
+	//mm := make([][]string, a.h)
+	//for i := range mm {
+	//	mm[i] = make([]string, a.w)
+	//	for j := range mm[i] {
+	//		if a.matrix[j][i] == sought {
+	//			mm[i][j] = "x"
+	//		} else {
+	//			mm[i][j] = "-"
+	//		}
+	//	}
+	//}
+	//mm[point.Y][point.X] = "p"
 	for frame := 1; frame <= lastFrame; frame++ {
 		/* s - start (x, y)
 		^s-->
@@ -59,7 +73,7 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 		*/
 		baseFrom := -(frame - 1)
 		x := baseFrom + point.X
-		y := -frame + point.X
+		y := -frame + point.Y
 		/*
 			---++++++
 			----+++++
@@ -78,7 +92,14 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 			for axis := 0; axis <= 1; axis++ {
 				// if we trying to check x line out of map (negative)
 				if xLine == true && y < 0 {
-					x = frame
+					x = frame*polarity + point.X
+					xLine = !xLine
+					lastPolarity = polarity
+					continue
+				}
+				// if we trying to check y line out of map (negative)
+				if xLine == false && x < 0 {
+					y = frame*polarity + point.Y
 					xLine = !xLine
 					lastPolarity = polarity
 					continue
@@ -86,6 +107,11 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 
 				// if we trying to check line out of map (positive)
 				if frame > limit[!xLine][lastPolarity] {
+					if xLine {
+						x = frame*polarity + point.X
+					} else {
+						y = frame*polarity + point.Y
+					}
 					xLine = !xLine
 					lastPolarity = polarity
 					continue
@@ -110,9 +136,19 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 						y = j*polarity + point.Y
 					}
 
+					//mm[y][x] = "+"
 					if a.matrix[x][y] == sought {
 						return &pkg.Pos{X: x, Y: y}
 					}
+
+					// debug
+					//out := ""
+					//for x := range mm{
+					//	out = out + strings.Join(mm[x], "") + "\n"
+					//}
+					//fmt.Printf("\x0c%s", out)
+					//out = ""
+					//time.Sleep(800 * time.Millisecond)
 				}
 
 				xLine = !xLine

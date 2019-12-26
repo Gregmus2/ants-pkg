@@ -17,7 +17,7 @@ func TestAI_Do(t *testing.T) {
 	}
 
 	target, action := Greg.Do(1, fields, 1, &pkg.Pos{})
-	if target.X != -1 || target.Y != -1 || action != pkg.EatAction {
+	if target.X != 0 || target.Y != -1 || action != pkg.MoveAction {
 		t.Errorf("Wrong behaviour of algorithm. %v", target)
 	}
 
@@ -30,7 +30,7 @@ func TestAI_Do(t *testing.T) {
 	}
 
 	target = &pkg.Pos{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 500; i++ {
 		target, action = Greg.Do(1, fields, 1, target)
 		if target.X == 0 && target.Y == 0 {
 			t.Error(target)

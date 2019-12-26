@@ -7,17 +7,17 @@ import (
 
 func TestAnt_CalcStep(t *testing.T) {
 	ant := &Ant{Pos: &pkg.Pos{X: 55, Y: 56}}
-	pos := ant.CalcStep(60, 60)
+	pos, _ := ant.CalcStep(60, 60)
 	if pos.X != 1 || pos.Y != 1 {
 		t.Errorf("Wrong calculation of step: %v, &{%d %d}", pos, 1, 1)
 	}
 
-	pos = ant.CalcStep(60, 56)
+	pos, _ = ant.CalcStep(60, 56)
 	if pos.X != 1 || pos.Y != 0 {
 		t.Errorf("Wrong calculation of step: %v, &{%d %d}", pos, 1, 0)
 	}
 
-	pos = ant.CalcStep(54, 20)
+	pos, _ = ant.CalcStep(54, 20)
 	if pos.X != -1 || pos.Y != -1 {
 		t.Errorf("Wrong calculation of step: %v, &{%d %d}", pos, -1, -1)
 	}
