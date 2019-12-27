@@ -189,7 +189,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 		a.h = a.h * 2
 	}
 
-	if nX <= 0 {
+	if nX < 0 {
 		expandedMatrix := make([][]pkg.FieldType, a.w, a.w*2)
 		// fill new part
 		for x := 0; x < a.w; x++ {
@@ -217,7 +217,7 @@ func (a *Area) RewriteMap(nX, nY int, t pkg.FieldType, ai *AI) bool {
 		a.matrix = expandedMatrix
 	}
 
-	if nY <= 0 {
+	if nY < 0 {
 		expandedMatrix := make([][]pkg.FieldType, a.w)
 		// fill new part
 		for x := range expandedMatrix {

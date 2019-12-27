@@ -40,13 +40,13 @@ func NewAI(birthRelativePos *pkg.Pos, anthillID int) AI {
 	return ai
 }
 
-func (ai *AI) Start(anthillID int, birthPos *pkg.Pos) {
-	Greg = NewAI(birthPos, anthillID)
+func (ai *AI) Start(anthillID int, birthPos pkg.Pos) {
+	Greg = NewAI(&birthPos, anthillID)
 }
 
-func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff *pkg.Pos) (target *pkg.Pos, action pkg.Action) {
+func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff pkg.Pos) (target *pkg.Pos, action pkg.Action) {
 	currentAnt := ai.ants[antID]
-	currentAnt.Pos.Add(posDiff)
+	currentAnt.Pos.Add(&posDiff)
 	ai.updateArea(fields, currentAnt)
 
 	return GiveOrder(currentAnt, ai)
@@ -65,18 +65,18 @@ func (ai *AI) OnAnthillDie(anthillID int) {
 func (ai *AI) OnAntBirth(antID int, anthillID int) {
 	ai.area.SetByPos(ai.anthills[anthillID].BirthPos, pkg.AllyField)
 	ai.ants[antID] = &Ant{
-		Pos:  ai.anthills[anthillID].BirthPos,
+		Pos:  &pkg.Pos{X: ai.anthills[anthillID].BirthPos.X, Y: ai.anthills[anthillID].BirthPos.Y},
 		Role: ai.getActualRole(),
 	}
 }
 
-func (ai *AI) OnNewAnthill(invaderID int, birthPos *pkg.Pos, anthillID int) {
+func (ai *AI) OnNewAnthill(invaderID int, birthPos pkg.Pos, anthillID int) {
 	pos := ai.area.Closest(ai.ants[invaderID].Pos, pkg.EnemyAnthillField)
 	ai.area.SetByPos(pos, pkg.AllyAnthillField)
 	birthPos.Add(pos)
 	ai.anthills[anthillID] = &Anthill{
 		Pos:      pos,
-		BirthPos: birthPos,
+		BirthPos: &birthPos,
 	}
 }
 
