@@ -82,11 +82,16 @@ func (ai *AI) OnNewAnthill(invaderID int, birthPos pkg.Pos, anthillID int) {
 
 // update information about real area on my prospective area
 func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
+	hasWall := false
 	for dx := range fields {
 		for dy, t := range fields[dx] {
+			if t == pkg.WallField {
+				hasWall = true
+			}
+
 			x := current.Pos.X + dx - 2
 			y := current.Pos.Y + dy - 2
-			if ai.area.RewriteMap(x, y, t, ai) {
+			if ai.area.RewriteMap(x, y, ai) {
 				x = current.Pos.X + dx - 2
 				y = current.Pos.Y + dy - 2
 			}
@@ -101,6 +106,10 @@ func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
 
 			ai.area.matrix[x][y] = t
 		}
+	}
+
+	if hasWall {
+		// fixme handle wall and noField case, when we need to make area shorter
 	}
 }
 

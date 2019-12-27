@@ -7,7 +7,7 @@ import (
 )
 
 func TestAI_Do(t *testing.T) {
-	Greg.Start(1, &pkg.Pos{X: 1})
+	Greg.Start(1, pkg.Pos{X: 1})
 	Greg.OnAntBirth(1, 1)
 	fields := [5][5]pkg.FieldType{
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
@@ -17,17 +17,17 @@ func TestAI_Do(t *testing.T) {
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 	}
 
-	target, action := Greg.Do(1, fields, 1, &pkg.Pos{})
+	target, action := Greg.Do(1, fields, 1, pkg.Pos{})
 	if target.X != 0 || target.Y != -1 || action != pkg.MoveAction {
 		t.Errorf("Wrong behaviour of algorithm. %v", target)
 	}
 
 	fields = [5][5]pkg.FieldType{
-		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, unknownField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
-		{unknownField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 	}
 
 	target = &pkg.Pos{}
@@ -36,7 +36,7 @@ func TestAI_Do(t *testing.T) {
 			Greg.OnAntBirth(i, 1)
 		}
 		for id := range Greg.ants {
-			target, action = Greg.Do(id, fields, 1, target)
+			target, action = Greg.Do(id, fields, 1, *target)
 			if target.X == 0 && target.Y == 0 {
 				t.Error(target)
 			}
@@ -45,7 +45,7 @@ func TestAI_Do(t *testing.T) {
 }
 
 func TestAI_Start(t *testing.T) {
-	Greg.Start(1, &pkg.Pos{X: 1})
+	Greg.Start(1, pkg.Pos{X: 1})
 	anthill := Greg.anthills[1]
 
 	if anthill.Pos.X != defaultSize/2 || anthill.Pos.Y != defaultSize/2 {
@@ -83,7 +83,7 @@ func TestAI_OnNewAnthill(t *testing.T) {
 	ai := NewAI(&pkg.Pos{1, 0}, 1)
 	ai.area.matrix[40][40] = pkg.EnemyAnthillField
 	ai.OnAntBirth(23, 1)
-	ai.OnNewAnthill(23, &pkg.Pos{1, 1}, 2)
+	ai.OnNewAnthill(23, pkg.Pos{1, 1}, 2)
 	if ai.anthills[2].Pos.X != 40 || ai.anthills[2].Pos.Y != 40 {
 		t.Errorf("Wrong pos of new anthill. Expected: %d %d. Actual: %v", 40, 40, ai.ants[2].Pos)
 	}
