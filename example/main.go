@@ -107,13 +107,8 @@ func (ai *AI) OnNewAnthill(invaderID int, birthPos pkg.Pos, anthillID int) {
 
 // update information about real area on my prospective area
 func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
-	hasWall := false
 	for dx := range fields {
 		for dy, t := range fields[dx] {
-			if t == pkg.WallField {
-				hasWall = true
-			}
-
 			x := current.Pos.X + dx - 2
 			y := current.Pos.Y + dy - 2
 			if ai.area.RewriteMap(x, y, ai) {
@@ -133,9 +128,7 @@ func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
 		}
 	}
 
-	if hasWall {
-		// fixme handle wall and noField case, when we need to make area shorter
-	}
+	ai.area.CutArea(fields, current.Pos, ai)
 }
 
 /*
@@ -163,6 +156,18 @@ func (ai *AI) getActualRole() Role {
 
 func (ai *AI) getDeviation(curDirection *pkg.Pos) *pkg.Pos {
 	return ai.deviationTable[curDirection.X+1][curDirection.Y+1][ai.area.r.Intn(2)]
+}
+
+func (ai *AI) moveObjects(diff *pkg.Pos) {
+	for _, ant := range ai.ants {
+		ant.Pos.Add(diff)
+	}
+	for _, anthill := range ai.anthills {
+		anthill.Pos.Add(diff)
+	}
+	for _, pos := range ai.enemyAnthills {
+		pos.Add(diff)
+	}
 }
 
 var Greg AI

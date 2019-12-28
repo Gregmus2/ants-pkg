@@ -155,7 +155,7 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 					// debug
 					//out := ""
 					//for x := range mm{
-					//	out = out + strings.Join(mm[x], "") + "\n"
+					//	out += strings.Join(mm[x], "") + "\n"
 					//}
 					//fmt.Printf("\x0c%s", out)
 					//out = ""
@@ -189,7 +189,7 @@ func (a *Area) RewriteMap(nX, nY int, ai *AI) bool {
 			}
 		}
 
-		a.w = a.w * 2
+		a.w *= 2
 	}
 
 	if nY >= a.h {
@@ -199,7 +199,7 @@ func (a *Area) RewriteMap(nX, nY int, ai *AI) bool {
 			}
 		}
 
-		a.h = a.h * 2
+		a.h *= 2
 	}
 
 	if nX < 0 {
@@ -214,19 +214,8 @@ func (a *Area) RewriteMap(nX, nY int, ai *AI) bool {
 
 		// fill old part
 		expandedMatrix = append(expandedMatrix, a.matrix...)
-
-		posDiff := &pkg.Pos{X: a.w}
-		for _, ant := range ai.ants {
-			ant.Pos.Add(posDiff)
-		}
-		for _, anthill := range ai.anthills {
-			anthill.Pos.Add(posDiff)
-		}
-		for _, pos := range ai.enemyAnthills {
-			pos.Add(posDiff)
-		}
-
-		a.w = a.w * 2
+		ai.moveObjects(&pkg.Pos{X: a.w})
+		a.w *= 2
 		a.matrix = expandedMatrix
 	}
 
@@ -247,20 +236,41 @@ func (a *Area) RewriteMap(nX, nY int, ai *AI) bool {
 			}
 		}
 
-		posDiff := &pkg.Pos{Y: a.h}
-		for _, ant := range ai.ants {
-			ant.Pos.Add(posDiff)
-		}
-		for _, anthill := range ai.anthills {
-			anthill.Pos.Add(posDiff)
-		}
-		for _, pos := range ai.enemyAnthills {
-			pos.Add(posDiff)
-		}
-
-		a.h = a.h * 2
+		ai.moveObjects(&pkg.Pos{Y: a.h})
+		a.h *= 2
 		a.matrix = expandedMatrix
 	}
 
 	return true
+}
+
+func (a *Area) CutArea(fields [5][5]pkg.FieldType, antPos *pkg.Pos, ai *AI) {
+	if fields[0][2] == pkg.WallField && antPos.X-2 != 1 {
+		diff := antPos.X - 3
+		a.matrix = a.matrix[diff:]
+		ai.moveObjects(&pkg.Pos{X: -diff})
+		a.w -= diff
+	}
+
+	if fields[2][0] == pkg.WallField && antPos.Y-2 != 1 {
+		diff := antPos.Y - 3
+		for x := range a.matrix {
+			a.matrix[x] = a.matrix[x][diff:]
+		}
+
+		ai.moveObjects(&pkg.Pos{Y: -diff})
+		a.h -= diff
+	}
+
+	if fields[4][2] == pkg.WallField && antPos.X+2 != a.w-2 {
+		a.w = antPos.X + 4
+		a.matrix = a.matrix[:a.w]
+	}
+
+	if fields[2][4] == pkg.WallField && antPos.Y+2 != a.h-2 {
+		a.h = antPos.Y + 4
+		for x := range a.matrix {
+			a.matrix[x] = a.matrix[x][:a.h]
+		}
+	}
 }

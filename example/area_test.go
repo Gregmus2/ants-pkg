@@ -108,3 +108,20 @@ func TestAreaRewriteMap(t *testing.T) {
 		t.Errorf("Area Expansion False. target: %v, ai.area.w: %d, ai.area.h: %d", ai.area.matrix[145][339], ai.area.w, ai.area.h)
 	}
 }
+
+func TestArea_CutArea(t *testing.T) {
+	ai := NewAI(&pkg.Pos{X: 1}, 1)
+	ai.ants[1] = &Ant{
+		Pos: &pkg.Pos{X: 51, Y: 50},
+	}
+	ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: 23, Y: 21})
+
+	fields := [5][5]pkg.FieldType{
+		{pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.FoodField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+	}
+	ai.area.CutArea(fields, &pkg.Pos{X: 65, Y: 58}, &ai)
+}
