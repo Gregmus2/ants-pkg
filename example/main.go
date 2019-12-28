@@ -6,10 +6,11 @@ import (
 
 // todo tests
 type AI struct {
-	area          *Area // prospective area
-	ants          map[int]*Ant
-	anthills      map[int]*Anthill
-	enemyAnthills pkg.PosCollection
+	area           *Area // prospective area
+	ants           map[int]*Ant
+	anthills       map[int]*Anthill
+	enemyAnthills  pkg.PosCollection
+	deviationTable [3][3][2]*pkg.Pos
 }
 
 const unknownField pkg.FieldType = 255
@@ -20,14 +21,33 @@ func main() {
 }
 
 func NewAI(birthRelativePos *pkg.Pos, anthillID int) AI {
+	deviationTable := [3][3][2]*pkg.Pos{
+		{
+			{{0, -1}, {-1, 0}},
+			{{-1, -1}, {-1, 1}},
+			{{0, 1}, {-1, 0}},
+		},
+		{
+			{{-1, -1}, {1, -1}},
+			{{0, 0}, {0, 0}},
+			{{1, 1}, {-1, 1}},
+		},
+		{
+			{{0, -1}, {1, 0}},
+			{{1, 1}, {1, -1}},
+			{{0, 1}, {1, 0}},
+		},
+	}
+
 	anthillPos := &pkg.Pos{X: defaultSize / 2, Y: defaultSize / 2}
 	birthRelativePos.Add(anthillPos)
 	// for the beginning I guess that my birth point in the center of prospective area
 	ai := AI{
-		area:          NewArea(defaultSize, defaultSize),
-		ants:          make(map[int]*Ant),
-		anthills:      make(map[int]*Anthill),
-		enemyAnthills: make(pkg.PosCollection, 0, 1),
+		area:           NewArea(defaultSize, defaultSize),
+		ants:           make(map[int]*Ant),
+		anthills:       make(map[int]*Anthill),
+		enemyAnthills:  make(pkg.PosCollection, 0, 1),
+		deviationTable: deviationTable,
 	}
 	ai.area.SetByPos(anthillPos, pkg.AllyAnthillField)
 	ai.area.SetByPos(birthRelativePos, pkg.AllyField)
@@ -49,7 +69,12 @@ func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff pkg.P
 	currentAnt.Pos.Add(&posDiff)
 	ai.updateArea(fields, currentAnt)
 
-	return GiveOrder(currentAnt, ai)
+	target, action = GiveOrder(currentAnt, ai)
+	if t := ai.area.GetRelative(currentAnt.Pos, target); (t == pkg.AllyAnthillField || t == pkg.AllyField) && !target.IsZero() {
+		target = ai.getDeviation(target)
+	}
+
+	return
 }
 
 func (ai *AI) OnAntDie(antID int) {
@@ -134,6 +159,10 @@ func (ai *AI) getActualRole() Role {
 	default:
 		return explorer
 	}
+}
+
+func (ai *AI) getDeviation(curDirection *pkg.Pos) *pkg.Pos {
+	return ai.deviationTable[curDirection.X+1][curDirection.Y+1][ai.area.r.Intn(2)]
 }
 
 var Greg AI

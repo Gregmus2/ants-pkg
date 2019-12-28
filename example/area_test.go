@@ -36,11 +36,6 @@ func TestAreaClosest(t *testing.T) {
 		t.Errorf("Wrong calculation of closest: %v, &{%d %d}", pos, 40, 40)
 	}
 
-	pos = area.Closest(&pkg.Pos{X: 5, Y: 1}, pkg.EnemyField)
-	if pos.X != 41 || pos.Y != 40 {
-		t.Errorf("Wrong calculation of closest: %v, &{%d %d}", pos, 41, 40)
-	}
-
 	pos = area.Closest(&pkg.Pos{X: 98, Y: 95}, pkg.EnemyField)
 	if pos.X != 51 || pos.Y != 50 {
 		t.Errorf("Wrong calculation of closest: %v, &{%d %d}", pos, 51, 50)
@@ -65,7 +60,7 @@ func TestAreaRewriteMap(t *testing.T) {
 	ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: 23, Y: 21})
 
 	ai.area.matrix[45][39] = pkg.AllyField
-	ok := ai.area.RewriteMap(0, 0, pkg.EnemyField, &ai)
+	ok := ai.area.RewriteMap(0, 0, &ai)
 	if ok || ai.area.matrix[45][39] != pkg.AllyField ||
 		ai.ants[1].Pos.X != 51 || ai.ants[1].Pos.Y != 50 ||
 		ai.anthills[1].Pos.X != 50 || ai.anthills[1].Pos.Y != 50 ||
@@ -73,7 +68,7 @@ func TestAreaRewriteMap(t *testing.T) {
 		t.Error("Area Expansion False")
 	}
 
-	ok = ai.area.RewriteMap(99, 99, pkg.AnthillField, &ai)
+	ok = ai.area.RewriteMap(99, 99, &ai)
 	if ok || ai.area.matrix[45][39] != pkg.AllyField ||
 		ai.ants[1].Pos.X != 51 || ai.ants[1].Pos.Y != 50 ||
 		ai.anthills[1].Pos.X != 50 || ai.anthills[1].Pos.Y != 50 ||
@@ -81,7 +76,7 @@ func TestAreaRewriteMap(t *testing.T) {
 		t.Error("Area Expansion False")
 	}
 
-	ok = ai.area.RewriteMap(-5, 2, pkg.AnthillField, &ai)
+	ok = ai.area.RewriteMap(-5, 2, &ai)
 	if !ok || ai.area.matrix[145][39] != pkg.AllyField || ai.area.w != 200 ||
 		ai.ants[1].Pos.X != 151 || ai.ants[1].Pos.Y != 50 ||
 		ai.anthills[1].Pos.X != 150 || ai.anthills[1].Pos.Y != 50 ||
@@ -89,7 +84,7 @@ func TestAreaRewriteMap(t *testing.T) {
 		t.Error("Area Expansion False")
 	}
 
-	ok = ai.area.RewriteMap(58, -5, pkg.EnemyField, &ai)
+	ok = ai.area.RewriteMap(58, -5, &ai)
 	if !ok || ai.area.matrix[145][139] != pkg.AllyField || ai.area.h != 200 ||
 		ai.ants[1].Pos.X != 151 || ai.ants[1].Pos.Y != 150 ||
 		ai.anthills[1].Pos.X != 150 || ai.anthills[1].Pos.Y != 150 ||
@@ -97,7 +92,7 @@ func TestAreaRewriteMap(t *testing.T) {
 		t.Error("Area Expansion False")
 	}
 
-	ok = ai.area.RewriteMap(220, -5, pkg.EnemyField, &ai)
+	ok = ai.area.RewriteMap(220, -5, &ai)
 	if !ok || ai.area.matrix[145][339] != pkg.AllyField || ai.area.w != 400 || ai.area.h != 400 ||
 		ai.ants[1].Pos.X != 151 || ai.ants[1].Pos.Y != 350 ||
 		ai.anthills[1].Pos.X != 150 || ai.anthills[1].Pos.Y != 350 ||
@@ -105,7 +100,7 @@ func TestAreaRewriteMap(t *testing.T) {
 		t.Error("Area Expansion False")
 	}
 
-	ok = ai.area.RewriteMap(220, 405, pkg.EnemyField, &ai)
+	ok = ai.area.RewriteMap(220, 405, &ai)
 	if !ok || ai.area.matrix[145][339] != pkg.AllyField || ai.area.w != 400 || ai.area.h != 800 ||
 		ai.ants[1].Pos.X != 151 || ai.ants[1].Pos.Y != 350 ||
 		ai.anthills[1].Pos.X != 150 || ai.anthills[1].Pos.Y != 350 ||

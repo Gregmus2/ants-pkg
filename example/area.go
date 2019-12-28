@@ -3,11 +3,14 @@ package main
 import (
 	pkg "github.com/gregmus2/ants-pkg"
 	"math"
+	"math/rand"
+	"time"
 )
 
 type Area struct {
 	w, h   int
 	matrix [][]pkg.FieldType
+	r      *rand.Rand
 }
 
 func NewArea(w, h int) *Area {
@@ -23,11 +26,16 @@ func NewArea(w, h int) *Area {
 		w:      w,
 		h:      h,
 		matrix: matrix,
+		r:      rand.New(rand.NewSource(time.Now().Unix())),
 	}
 }
 
 func (a *Area) SetByPos(pos *pkg.Pos, field pkg.FieldType) {
 	a.matrix[pos.X][pos.Y] = field
+}
+
+func (a *Area) GetRelative(pos *pkg.Pos, diff *pkg.Pos) pkg.FieldType {
+	return a.matrix[pos.X+diff.X][pos.Y+diff.Y]
 }
 
 func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
@@ -51,6 +59,8 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 	}
 	xLine := true
 	lastPolarity := -1
+	isFound := false
+	results := make([]*pkg.Pos, 0, 1)
 
 	// debug
 	//mm := make([][]string, a.h)
@@ -138,7 +148,8 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 
 					//mm[y][x] = "+"
 					if a.matrix[x][y] == sought {
-						return &pkg.Pos{X: x, Y: y}
+						results = append(results, &pkg.Pos{X: x, Y: y})
+						isFound = true
 					}
 
 					// debug
@@ -154,6 +165,10 @@ func (a *Area) Closest(point *pkg.Pos, sought pkg.FieldType) *pkg.Pos {
 				xLine = !xLine
 				lastPolarity = polarity
 			}
+		}
+
+		if isFound {
+			return results[a.r.Intn(len(results))]
 		}
 	}
 
