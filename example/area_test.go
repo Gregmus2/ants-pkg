@@ -19,12 +19,6 @@ func TestAreaClosest(t *testing.T) {
 		t.Errorf("Wrong calculation of closest: %v, &{%d %d}", pos, 40, 40)
 	}
 
-	area.matrix[41][40] = pkg.EnemyField
-	pos = area.Closest(&pkg.Pos{X: 50, Y: 50}, pkg.EnemyField)
-	if pos.X != 41 || pos.Y != 40 {
-		t.Errorf("Wrong calculation of closest: %v, &{%d %d}", pos, 41, 40)
-	}
-
 	area.matrix[51][50] = pkg.EnemyField
 	pos = area.Closest(&pkg.Pos{X: 50, Y: 50}, pkg.EnemyField)
 	if pos.X != 51 || pos.Y != 50 {
@@ -47,7 +41,7 @@ func TestAreaClosest(t *testing.T) {
 	}
 
 	pos = area.Closest(&pkg.Pos{X: 32, Y: 3}, pkg.EnemyField)
-	if pos.X != 41 || pos.Y != 40 {
+	if (pos.X != 41 || pos.Y != 40) && (pos.X != 40 || pos.Y != 40) {
 		t.Errorf("Wrong calculation of closest: %v, &{%d %d}", pos, 41, 40)
 	}
 }
@@ -117,11 +111,22 @@ func TestArea_CutArea(t *testing.T) {
 	ai.enemyAnthills = append(ai.enemyAnthills, &pkg.Pos{X: 23, Y: 21})
 
 	fields := [5][5]pkg.FieldType{
-		{pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.FoodField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
-		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField},
 	}
 	ai.area.CutArea(fields, &pkg.Pos{X: 65, Y: 58}, &ai)
+
+	if ai.area.w != 69 || ai.area.h != 100 ||
+		ai.ants[1].Pos.X != 51 || ai.ants[1].Pos.Y != 50 ||
+		ai.enemyAnthills[0].X != 23 || ai.enemyAnthills[0].Y != 21 {
+		t.Errorf(
+			"Area Expansion False. w: %d/%d, h: %d/%d, ant: %v/%v",
+			ai.area.w, 69,
+			ai.area.h, 100,
+			ai.ants[1].Pos, pkg.Pos{51, 50},
+		)
+	}
 }
