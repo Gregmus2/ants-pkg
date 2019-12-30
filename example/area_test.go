@@ -129,4 +129,44 @@ func TestArea_CutArea(t *testing.T) {
 			ai.ants[1].Pos, pkg.Pos{51, 50},
 		)
 	}
+
+	fields = [5][5]pkg.FieldType{
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.WallField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.WallField},
+		{pkg.FoodField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.WallField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.WallField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.WallField},
+	}
+	ai.area.CutArea(fields, &pkg.Pos{X: 65, Y: 58}, &ai)
+
+	if ai.area.w != 69 || ai.area.h != 62 ||
+		ai.ants[1].Pos.X != 51 || ai.ants[1].Pos.Y != 50 ||
+		ai.enemyAnthills[0].X != 23 || ai.enemyAnthills[0].Y != 21 {
+		t.Errorf(
+			"Area Expansion False. w: %d/%d, h: %d/%d, ant: %v/%v",
+			ai.area.w, 69,
+			ai.area.h, 62,
+			ai.ants[1].Pos, pkg.Pos{51, 50},
+		)
+	}
+
+	fields = [5][5]pkg.FieldType{
+		{pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField, pkg.WallField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.FoodField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+	}
+	ai.area.CutArea(fields, &pkg.Pos{X: 20, Y: 20}, &ai)
+
+	if ai.area.w != 52 || ai.area.h != 62 ||
+		ai.ants[1].Pos.X != 34 || ai.ants[1].Pos.Y != 50 ||
+		ai.enemyAnthills[0].X != 6 || ai.enemyAnthills[0].Y != 21 {
+		t.Errorf(
+			"Area Expansion False. w: %d/%d, h: %d/%d, ant: %v/%v",
+			ai.area.w, 52,
+			ai.area.h, 62,
+			ai.ants[1].Pos, pkg.Pos{34, 50},
+		)
+	}
 }
