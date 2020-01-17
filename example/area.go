@@ -245,14 +245,14 @@ func (a *Area) RewriteMap(nX, nY int, ai *AI) bool {
 }
 
 func (a *Area) CutArea(fields [5][5]pkg.FieldType, antPos *pkg.Pos, ai *AI) {
-	if fields[0][2] == pkg.WallField && antPos.X-2 != 1 {
+	if fields[0][2] == pkg.WallField && antPos.X-2 > 1 {
 		diff := antPos.X - 3
 		a.matrix = a.matrix[diff:]
 		ai.moveObjects(&pkg.Pos{X: -diff})
 		a.w -= diff
 	}
 
-	if fields[2][0] == pkg.WallField && antPos.Y-2 != 1 {
+	if fields[2][0] == pkg.WallField && antPos.Y-2 > 1 {
 		diff := antPos.Y - 3
 		for x := range a.matrix {
 			a.matrix[x] = a.matrix[x][diff:]
@@ -262,12 +262,12 @@ func (a *Area) CutArea(fields [5][5]pkg.FieldType, antPos *pkg.Pos, ai *AI) {
 		a.h -= diff
 	}
 
-	if fields[4][2] == pkg.WallField && antPos.X+2 != a.w-2 {
+	if fields[4][2] == pkg.WallField && antPos.X+2 < a.w-2 {
 		a.w = antPos.X + 4
 		a.matrix = a.matrix[:a.w]
 	}
 
-	if fields[2][4] == pkg.WallField && antPos.Y+2 != a.h-2 {
+	if fields[2][4] == pkg.WallField && antPos.Y+2 < a.h-2 {
 		a.h = antPos.Y + 4
 		for x := range a.matrix {
 			a.matrix[x] = a.matrix[x][:a.h]
