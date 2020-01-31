@@ -2,7 +2,7 @@ package pkg
 
 type Algorithm interface {
 	Start(anthillID int, birthPos Pos)
-	Do(antID int, fields [5][5]FieldType, round int, posDiff Pos) (target *Pos, action Action)
+	Do(antID int, fields [5][5]FieldType, round int, posDiff Pos) (target Pos, action Action)
 	OnAntDie(antID int)
 	OnAnthillDie(anthillID int)
 	OnAntBirth(antID int, anthillID int)

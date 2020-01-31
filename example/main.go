@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/gregmus2/ants-pkg"
+	"log"
+	"os"
 )
 
 // todo tests
@@ -10,7 +12,8 @@ type AI struct {
 	ants           map[int]*Ant
 	anthills       map[int]*Anthill
 	enemyAnthills  pkg.PosCollection
-	deviationTable [3][3][2]*pkg.Pos
+	deviationTable [3][3][2]pkg.Pos
+	log            *log.Logger
 }
 
 const unknownField pkg.FieldType = 255
@@ -21,7 +24,7 @@ func main() {
 }
 
 func NewAI(birthRelativePos *pkg.Pos, anthillID int) AI {
-	deviationTable := [3][3][2]*pkg.Pos{
+	deviationTable := [3][3][2]pkg.Pos{
 		{
 			{{0, -1}, {-1, 0}},
 			{{-1, -1}, {-1, 1}},
@@ -57,6 +60,9 @@ func NewAI(birthRelativePos *pkg.Pos, anthillID int) AI {
 		BirthPos: birthRelativePos,
 	}
 
+	f, _ := os.OpenFile("log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	ai.log = log.New(f, "", log.LstdFlags|log.Lshortfile)
+
 	return ai
 }
 
@@ -64,7 +70,7 @@ func (ai *AI) Start(anthillID int, birthPos pkg.Pos) {
 	Greg = NewAI(&birthPos, anthillID)
 }
 
-func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff pkg.Pos) (target *pkg.Pos, action pkg.Action) {
+func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff pkg.Pos) (target pkg.Pos, action pkg.Action) {
 	currentAnt := ai.ants[antID]
 	currentAnt.Pos.Add(&posDiff)
 	ai.updateArea(fields, currentAnt)
@@ -90,6 +96,7 @@ func (ai *AI) OnAnthillDie(anthillID int) {
 func (ai *AI) OnAntBirth(antID int, anthillID int) {
 	ai.area.SetByPos(ai.anthills[anthillID].BirthPos, pkg.AllyField)
 	ai.ants[antID] = &Ant{
+		ID:   antID,
 		Pos:  &pkg.Pos{X: ai.anthills[anthillID].BirthPos.X, Y: ai.anthills[anthillID].BirthPos.Y},
 		Role: ai.getActualRole(),
 	}
@@ -154,7 +161,7 @@ func (ai *AI) getActualRole() Role {
 	}
 }
 
-func (ai *AI) getDeviation(curDirection *pkg.Pos) *pkg.Pos {
+func (ai *AI) getDeviation(curDirection pkg.Pos) pkg.Pos {
 	return ai.deviationTable[curDirection.X+1][curDirection.Y+1][ai.area.r.Intn(2)]
 }
 

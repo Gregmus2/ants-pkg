@@ -30,13 +30,13 @@ func TestAI_Do(t *testing.T) {
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 	}
 
-	target = &pkg.Pos{}
+	target = pkg.Pos{}
 	for i := 0; i < 500; i++ {
 		if math.Mod(float64(i), 10) == 0 {
 			Greg.OnAntBirth(i, 1)
 		}
 		for id := range Greg.ants {
-			target, action = Greg.Do(id, fields, 1, *target)
+			target, action = Greg.Do(id, fields, 1, target)
 			if target.X == 0 && target.Y == 0 {
 				t.Error(target)
 			}

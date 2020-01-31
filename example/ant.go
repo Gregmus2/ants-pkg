@@ -6,6 +6,7 @@ import (
 )
 
 type Ant struct {
+	ID    int
 	Pos   *pkg.Pos
 	Role  Role
 	Order Order

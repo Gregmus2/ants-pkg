@@ -34,7 +34,7 @@ func (a *Area) SetByPos(pos *pkg.Pos, field pkg.FieldType) {
 	a.matrix[pos.X][pos.Y] = field
 }
 
-func (a *Area) GetRelative(pos *pkg.Pos, diff *pkg.Pos) pkg.FieldType {
+func (a *Area) GetRelative(pos *pkg.Pos, diff pkg.Pos) pkg.FieldType {
 	return a.matrix[pos.X+diff.X][pos.Y+diff.Y]
 }
 

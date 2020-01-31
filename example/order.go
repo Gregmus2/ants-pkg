@@ -6,8 +6,8 @@ import (
 )
 
 type Order interface {
-	urgent() (*pkg.Pos, pkg.Action, bool)
-	follow() (*pkg.Pos, pkg.Action)
+	urgent() (pkg.Pos, pkg.Action, bool)
+	follow() (pkg.Pos, pkg.Action)
 	goal()
 	hasGoal() bool
 }
@@ -32,7 +32,7 @@ type Defend struct {
 	target *pkg.Pos
 }
 
-func GiveOrder(ant *Ant, greg *AI) (*pkg.Pos, pkg.Action) {
+func GiveOrder(ant *Ant, greg *AI) (pkg.Pos, pkg.Action) {
 	if ant.Order == nil {
 		ant.Order = GetOrder(ant, greg)
 	}
@@ -62,7 +62,7 @@ func GetOrder(ant *Ant, ai *AI) Order {
 	}
 }
 
-func (o *BaseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
+func (o *BaseOrder) urgent() (pkg.Pos, pkg.Action, bool) {
 	var foodPos, enemyPos *pkg.Pos
 	var enemyIsGoal, foodIsGoal bool
 	for x := o.Ant.Pos.X - 2; x <= o.Ant.Pos.X+2; x++ {
@@ -72,7 +72,7 @@ func (o *BaseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 			// todo get nearest food or enemy
 			case pkg.EnemyAnthillField:
 				step, isGoal := o.Ant.CalcStep(x, y)
-				return o.urgentResponse(step, isGoal, pkg.AttackAction)
+				return o.urgentResponse(*step, isGoal, pkg.AttackAction)
 			case pkg.EnemyField:
 				enemyPos, enemyIsGoal = o.Ant.CalcStep(x, y)
 			case pkg.FoodField:
@@ -82,17 +82,17 @@ func (o *BaseOrder) urgent() (*pkg.Pos, pkg.Action, bool) {
 	}
 
 	if enemyPos != nil {
-		return o.urgentResponse(enemyPos, enemyIsGoal, pkg.AttackAction)
+		return o.urgentResponse(*enemyPos, enemyIsGoal, pkg.AttackAction)
 	}
 
 	if foodPos != nil {
-		return o.urgentResponse(foodPos, foodIsGoal, pkg.EatAction)
+		return o.urgentResponse(*foodPos, foodIsGoal, pkg.EatAction)
 	}
 
-	return &pkg.Pos{}, 0, false
+	return pkg.Pos{}, 0, false
 }
 
-func (o *BaseOrder) urgentResponse(pos *pkg.Pos, isGoal bool, action pkg.Action) (*pkg.Pos, pkg.Action, bool) {
+func (o *BaseOrder) urgentResponse(pos pkg.Pos, isGoal bool, action pkg.Action) (pkg.Pos, pkg.Action, bool) {
 	if isGoal {
 		return pos, action, true
 	} else {
@@ -101,7 +101,7 @@ func (o *BaseOrder) urgentResponse(pos *pkg.Pos, isGoal bool, action pkg.Action)
 }
 
 // it's about long-term goal based on Role. Like explorer or go to capture enemy anthill
-func (o *BaseOrder) follow() (*pkg.Pos, pkg.Action) {
+func (o *BaseOrder) follow() (pkg.Pos, pkg.Action) {
 	// todo check for obstacles
 	deltaX := 0
 	if o.Pos.X != o.Ant.Pos.X {
@@ -115,7 +115,8 @@ func (o *BaseOrder) follow() (*pkg.Pos, pkg.Action) {
 		deltaY = diffY / int(math.Abs(float64(diffY)))
 	}
 
-	return &pkg.Pos{X: deltaX, Y: deltaY}, pkg.MoveAction
+	Greg.log.Printf("[%v] follow %d, %d", o.Ant.Pos, deltaX, deltaY)
+	return pkg.Pos{X: deltaX, Y: deltaY}, pkg.MoveAction
 }
 
 func (o *BaseOrder) hasGoal() bool {
