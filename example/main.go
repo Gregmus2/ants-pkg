@@ -77,7 +77,9 @@ func (ai *AI) Do(antID int, fields [5][5]pkg.FieldType, round int, posDiff pkg.P
 
 	target, action = GiveOrder(currentAnt, ai)
 	if t := ai.area.GetRelative(currentAnt.Pos, target); (t == pkg.AllyAnthillField || t == pkg.AllyField) && !target.IsZero() {
+		Greg.log.Printf("[%v] deviation before %v", currentAnt.Pos, target)
 		target = ai.getDeviation(target)
+		Greg.log.Printf("[%v] deviation %v", currentAnt.Pos, target)
 	}
 
 	return
@@ -114,6 +116,7 @@ func (ai *AI) OnNewAnthill(invaderID int, birthPos pkg.Pos, anthillID int) {
 
 // update information about real area on my prospective area
 func (ai *AI) updateArea(fields [5][5]pkg.FieldType, current *Ant) {
+	ai.log.Printf("%d, %v updateArea", current.ID, current.Pos)
 	for dx := range fields {
 		for dy, t := range fields[dx] {
 			x := current.Pos.X + dx - 2

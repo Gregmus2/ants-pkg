@@ -38,6 +38,7 @@ func GiveOrder(ant *Ant, greg *AI) (pkg.Pos, pkg.Action) {
 	}
 
 	if pos, action, ok := ant.Order.urgent(); ok {
+		Greg.log.Printf("[%v] urgent %d, %v", ant.Pos, action, pos)
 		return pos, action
 	}
 
@@ -161,9 +162,17 @@ func (o *Defend) goal() {
 
 	relativeX := o.Ant.Pos.X - o.target.X
 	relativeY := o.Ant.Pos.Y - o.target.Y
+	var x, y int
+	if relativeY == 0 {
+		x = 0
+		y = 0
+	} else {
+		x = 0 - relativeX/relativeY
+		y = relativeX / relativeY
+	}
 	o.Pos = &pkg.Pos{
-		X: (0-relativeX/relativeY)*relativeX + o.target.X,
-		Y: relativeX/relativeY*relativeY + o.target.Y,
+		X: x*relativeX + o.target.X,
+		Y: y*relativeY + o.target.Y,
 	}
 }
 

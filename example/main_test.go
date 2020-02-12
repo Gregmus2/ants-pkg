@@ -23,8 +23,8 @@ func TestAI_Do(t *testing.T) {
 	}
 
 	fields = [5][5]pkg.FieldType{
-		{pkg.EmptyField, pkg.EmptyField, unknownField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
+		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, unknownField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.AllyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
 		{pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField, pkg.EmptyField},
