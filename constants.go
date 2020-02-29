@@ -11,6 +11,8 @@ const (
 	WallField
 	AntField
 	AnthillField
+	AllyAnthillField
+	EnemyAnthillField
 )
 
 type Action uint8

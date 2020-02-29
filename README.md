@@ -1,3 +1,6 @@
+### Description
+Its algorithm for https://github.com/Gregmus2/ants
+
 ## Usage
 * Import `github.com/gregmus2/ants-pkg` package and implement Algorithm interface.
 * After that you must declare variable of your type which implement Algorithm interface.
